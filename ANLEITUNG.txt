@@ -1,0 +1,56 @@
+ZWEI MINUTEN BIBEL — als echte App auf GitHub Pages veröffentlichen
+=====================================================================
+
+Dieser Ordner enthält alle Dateien, die du brauchst:
+  index.html, manifest.json, sw.js, icon-192.png, icon-512.png,
+  maskable-192.png, maskable-512.png, apple-touch-icon.png, favicon.png
+
+Lade ALLE Dateien gemeinsam hoch (nicht nur index.html) — nur dann
+funktionieren Icon, Offline-Modus und der "App installieren"-Button.
+
+SCHRITT 1 — GitHub-Konto (falls noch keins vorhanden)
+  1. Gehe auf github.com und klicke "Sign up".
+  2. E-Mail, Passwort, Benutzername eingeben — kostenlos.
+
+SCHRITT 2 — Neues Repository anlegen
+  1. Oben rechts auf das "+" klicken → "New repository".
+  2. Name z. B.: zwei-minuten-bibel
+  3. Sichtbarkeit: Public (muss öffentlich sein für die kostenlose
+     GitHub-Pages-Funktion).
+  4. "Create repository" klicken (Häkchen bei README NICHT nötig).
+
+SCHRITT 3 — Dateien hochladen
+  1. Auf der neuen, leeren Repository-Seite auf den Link
+     "uploading an existing file" klicken.
+  2. Alle Dateien aus diesem Ordner per Drag & Drop in das Browserfenster
+     ziehen (index.html, manifest.json, sw.js und alle .png-Dateien).
+  3. Unten auf "Commit changes" klicken.
+
+SCHRITT 4 — GitHub Pages aktivieren
+  1. Oben im Repository auf "Settings" klicken.
+  2. Im linken Menü auf "Pages" klicken.
+  3. Unter "Build and deployment" → "Source": "Deploy from a branch"
+     auswählen.
+  4. Branch: "main", Ordner: "/ (root)" auswählen, dann "Save".
+  5. Kurz warten (meist 1–2 Minuten). Danach zeigt dir GitHub oben
+     die fertige Adresse an, etwa:
+     https://DEINBENUTZERNAME.github.io/zwei-minuten-bibel/
+
+SCHRITT 5 — Auf dem Handy installieren
+  1. Diese Adresse auf deinem Android-Handy in Chrome öffnen.
+  2. Warten, bis die Seite fertig geladen ist.
+  3. Entweder erscheint automatisch ein Banner "App installieren",
+     oder: oben rechts auf die drei Punkte ⋮ tippen → "App installieren"
+     bzw. "Zum Startbildschirm hinzufügen".
+  4. Bestätigen. Auf dem Homescreen erscheint das Buch-Icon.
+     Beim Öffnen startet die App jetzt wie eine echte App — ohne
+     Adressleiste, mit Offline-Cache. Nach dem ersten Laden brauchst
+     du kein Internet mehr, auch nicht für Updates deiner eigenen
+     Notizen/Favoriten (die bleiben ohnehin nur auf dem Gerät).
+
+SPÄTER ETWAS ÄNDERN
+  Einfach im GitHub-Repository die Datei index.html öffnen, auf das
+  Stift-Symbol (Bearbeiten) klicken oder eine neue Version hochladen
+  ("Add file" → "Upload files", gleicher Dateiname ersetzt die alte),
+  unten "Commit changes" klicken. GitHub Pages aktualisiert die Seite
+  automatisch innerhalb von ein bis zwei Minuten.

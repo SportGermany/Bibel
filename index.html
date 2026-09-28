@@ -1,0 +1,2101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Zwei Minuten Bibel · Elberfelder 1905</title>
+<meta name="description" content="Offline-Bibel-App mit der Elberfelder Bibel 1905, Lesestreak, Favoriten, Notizen, Volltextsuche und Nachtmodus.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0e1012" id="themeColorMeta">
+<meta name="application-name" content="Zwei Minuten Bibel">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="2-Min-Bibel">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.png">
+<style>
+  :root{
+    --bg: #0e1012;
+    --surface: #16191c;
+    --surface2: #1d2126;
+    --line: rgba(255,255,255,.09);
+    --line-strong: rgba(255,255,255,.16);
+    --accent: #8fb3c2;
+    --accent-bright: #b9d7e2;
+    --ink: #e6e8ea;
+    --muted: #767c82;
+    --at: #97ac7e;
+    --nt: #c98a6a;
+    --gold: #d8b463;
+    --hl-yellow: rgba(216,180,99,.28);
+    --hl-green: rgba(151,172,126,.28);
+    --hl-blue: rgba(143,179,194,.30);
+    --serif: "Charter", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --sans: -apple-system, "Segoe UI", Roboto, sans-serif;
+    --fs-scale: 1;
+  }
+  html[data-theme="light"]{
+    --bg: #f6f3ec;
+    --surface: #ffffff;
+    --surface2: #efece3;
+    --line: rgba(20,20,15,.10);
+    --line-strong: rgba(20,20,15,.20);
+    --accent: #4d7285;
+    --accent-bright: #2f5164;
+    --ink: #24211c;
+    --muted: #7a7468;
+    --at: #5f7449;
+    --nt: #a35a34;
+    --gold: #a67c2e;
+    --hl-yellow: rgba(214,170,60,.30);
+    --hl-green: rgba(95,116,73,.22);
+    --hl-blue: rgba(77,114,133,.20);
+  }
+  html[data-theme="sepia"]{
+    --bg: #efe4cd;
+    --surface: #f8f0dc;
+    --surface2: #e9dcbf;
+    --line: rgba(70,50,10,.14);
+    --line-strong: rgba(70,50,10,.24);
+    --accent: #8a6a3c;
+    --accent-bright: #6b4f27;
+    --ink: #3a2f1d;
+    --muted: #8a7a5c;
+    --at: #6d7a44;
+    --nt: #9c5a2c;
+    --gold: #93691f;
+    --hl-yellow: rgba(147,105,31,.25);
+    --hl-green: rgba(109,122,68,.22);
+    --hl-blue: rgba(109,90,60,.20);
+  }
+  html[data-theme="night"]{
+    --bg: #000000;
+    --surface: #130a06;
+    --surface2: #1c0f08;
+    --line: rgba(255,140,60,.10);
+    --line-strong: rgba(255,140,60,.22);
+    --accent: #c96a3e;
+    --accent-bright: #e08a4f;
+    --ink: #e8b98a;
+    --muted: #8a6048;
+    --at: #b98a52;
+    --nt: #d4703c;
+    --gold: #e0a83e;
+    --hl-yellow: rgba(224,168,62,.30);
+    --hl-green: rgba(196,140,70,.22);
+    --hl-blue: rgba(224,138,79,.26);
+  }
+  html[data-theme="night"] body{
+    /* zusätzliche, sanfte Rotverschiebung: unterdrückt Blauanteil im Bildschirmlicht */
+    filter: sepia(.18) saturate(1.12) hue-rotate(-6deg) brightness(.92);
+  }
+  *{box-sizing:border-box;}
+  html{ background:var(--bg); }
+  body{
+    margin:0;
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding: 28px 16px calc(86px + env(safe-area-inset-bottom)) 16px;
+    transition: background .2s ease, color .2s ease;
+  }
+  .app{ width:100%; max-width: 460px; }
+
+  body[data-fontstyle="sans"] .verse-text, body[data-fontstyle="sans"] .quote-text{ font-family: var(--sans); }
+  body[data-fontsize="sm"] { --fs-scale: 0.86; }
+  body[data-fontsize="md"] { --fs-scale: 1; }
+  body[data-fontsize="lg"] { --fs-scale: 1.16; }
+  body[data-fontsize="xl"] { --fs-scale: 1.34; }
+
+  header{ margin-bottom: 22px; }
+  header h1{
+    font-family: var(--serif); font-weight:400;
+    font-size:1.5rem; margin:0 0 6px; color: var(--ink);
+    letter-spacing:.1px;
+  }
+  header p{ margin:0; color:var(--muted); font-size:.83rem; }
+
+  /* ---------- Tabs / Views ---------- */
+  .view{ display:none; }
+  .view.active{ display:block; animation: fadeIn .25s ease; }
+  @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:0;
+    display:flex; justify-content:space-around;
+    background: var(--surface);
+    border-top:1px solid var(--line);
+    padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+    z-index: 40;
+  }
+  .tabbar button{
+    background:none; border:none; color:var(--muted);
+    font-family: var(--sans); font-size:.68rem;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:4px 8px; cursor:pointer; border-radius:8px;
+    transition: color .15s ease;
+  }
+  .tabbar button .ic{ font-size:1.15rem; line-height:1; }
+  .tabbar button.active{ color: var(--accent-bright); }
+
+  /* ---------- Stats / calendar ---------- */
+  .stats{
+    display:flex; align-items:baseline; gap:22px;
+    padding: 16px 0; margin-bottom: 14px;
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+  .stat .num{ font-family: var(--serif); font-size:1.6rem; color: var(--accent-bright); }
+  .stat .lbl{ font-size:.72rem; color:var(--muted); margin-top:2px; }
+
+  .cal-strip{ display:flex; gap:4px; margin-bottom:20px; }
+  .cal-dot{
+    flex:1; height:20px; border-radius:5px; background: var(--surface2);
+    border:1px solid var(--line);
+  }
+  .cal-dot.hit{ background: var(--accent); border-color: var(--accent); }
+  .cal-dot.today{ box-shadow: 0 0 0 1.5px var(--accent-bright) inset; }
+
+  /* ---------- Verse of the day / random verse cards ---------- */
+  .quote-card{
+    background: var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:16px 18px; margin-bottom:20px;
+  }
+  .quote-card .quote-label{
+    font-size:.68rem; letter-spacing:.4px; color:var(--muted); margin-bottom:8px;
+    text-transform:uppercase;
+  }
+  .quote-text{
+    font-family: var(--serif); font-size: calc(1.02rem * var(--fs-scale));
+    line-height:1.65; color:var(--ink); margin-bottom:8px;
+  }
+  .quote-ref{ font-size:.78rem; color:var(--accent-bright); }
+  .quote-card .qbtn{
+    margin-top:10px; background:none; border:1px solid var(--line-strong);
+    color:var(--muted); font-size:.72rem; padding:6px 10px; border-radius:7px; cursor:pointer;
+  }
+  .quote-card .qbtn:hover{ color:var(--accent-bright); border-color:var(--accent); }
+
+  /* ---------- Toggle rows ---------- */
+  .toggle-row{ display:flex; gap:20px; margin-bottom: 14px; border-bottom:1px solid var(--line); }
+  .toggle-row button{
+    border:none; background:none; padding:0 0 10px;
+    font-family: var(--sans); font-size:.85rem;
+    color:var(--muted); cursor:pointer; position:relative;
+    transition: color .15s ease;
+  }
+  .toggle-row button.active{ color: var(--ink); }
+  .toggle-row button.active::after{
+    content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background: var(--accent);
+  }
+  .mode-row{ display:flex; gap:8px; margin-bottom:20px; }
+  .mode-row button{
+    flex:1; padding:8px 6px; font-size:.75rem; border-radius:8px;
+    border:1px solid var(--line-strong); background:none; color:var(--muted); cursor:pointer;
+  }
+  .mode-row button.active{ color:var(--accent-bright); border-color:var(--accent); background:rgba(143,179,194,.08); }
+
+  .go-button{
+    display:block; width:100%; padding:16px;
+    font-family: var(--sans); font-size:.95rem; font-weight:600; color: var(--accent-bright);
+    background: transparent;
+    border:1px solid var(--accent); border-radius:10px; cursor:pointer;
+    letter-spacing:.2px;
+    transition: background .15s ease, transform .1s ease;
+  }
+  .go-button:active{ transform: translateY(1px); }
+  .go-button:hover{ background: rgba(143,179,194,.08); }
+  .go-button.done{ color: var(--muted); border-color: var(--line-strong); background:none; }
+
+  /* ---------- Passage (shared component) ---------- */
+  .passage{ margin-top: 28px; display:none; }
+  .passage.show{ display:block; animation: reveal .4s ease; }
+  @keyframes reveal{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:none;} }
+
+  .passage .badge{
+    display:inline-block; font-family: var(--sans); font-size:.68rem; font-weight:600;
+    letter-spacing:.3px; margin-bottom:10px;
+  }
+  .passage .badge.AT{ color: var(--at); }
+  .passage .badge.NT{ color: var(--nt); }
+
+  .passage h2{
+    font-family: var(--serif); font-weight:400;
+    font-size:1.3rem; margin:0 0 16px; color: var(--ink);
+  }
+  .passage .verse-text{
+    font-family: var(--serif);
+    font-size: calc(1.13rem * var(--fs-scale)); line-height:1.8; color: var(--ink);
+  }
+  .passage .verse-text::first-letter{
+    font-size: 2.6em; float:left; line-height:.85; padding: .04em .06em 0 0; color: var(--accent-bright);
+  }
+  .v{ border-radius:4px; padding:0 1px; }
+  .v.hl-yellow{ background: var(--hl-yellow); }
+  .v.hl-green{ background: var(--hl-green); }
+  .v.hl-blue{ background: var(--hl-blue); }
+  .vnum{
+    font-size:.6em; color: var(--muted); margin-right:3px; font-weight:600;
+    cursor:pointer; padding:2px 3px; border-radius:3px;
+  }
+  .vnum:hover{ background: var(--line); }
+  .vnum.fav::before{ content:"★ "; color: var(--gold); }
+
+  .passage .meta{
+    margin-top:18px; padding-top:12px; border-top:1px solid var(--line);
+    font-family: var(--sans); font-size:.75rem; color: var(--muted);
+    display:flex; justify-content:space-between;
+  }
+
+  .toolbar{ display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; }
+  .toolbar button{
+    background:none; border:1px solid var(--line-strong); color:var(--muted);
+    font-family:var(--sans); font-size:.72rem; padding:7px 10px; border-radius:8px; cursor:pointer;
+  }
+  .toolbar button:hover{ color:var(--accent-bright); border-color:var(--accent); }
+  .toolbar button.on{ color:var(--accent-bright); border-color:var(--accent); background:rgba(143,179,194,.08); }
+  .toolbar button.speaking{ color:var(--gold); border-color:var(--gold); }
+
+  .note-box{ margin-top:14px; }
+  .note-box textarea{
+    width:100%; min-height:60px; resize:vertical;
+    background: var(--surface2); border:1px solid var(--line); border-radius:8px;
+    color: var(--ink); font-family: var(--sans); font-size:.82rem; padding:9px 11px;
+  }
+  .note-box label{ font-size:.68rem; color:var(--muted); display:block; margin-bottom:5px; letter-spacing:.2px; }
+
+  .nav-row{ display:flex; justify-content:space-between; margin-top:18px; }
+  .nav-row button{
+    background:none; border:none; color: var(--muted); font-family: var(--sans);
+    font-size:.85rem; cursor:pointer; padding:6px 2px; transition: color .15s ease;
+  }
+  .nav-row button:hover{ color: var(--accent-bright); }
+  .nav-row button.next{ color: var(--accent); font-weight:600; }
+  .nav-row button.next:hover{ color: var(--accent-bright); }
+
+  /* ---------- Bibliothek ---------- */
+  .search-wrap{ margin-bottom:14px; }
+  .search-wrap input{
+    width:100%; padding:11px 13px; border-radius:9px;
+    border:1px solid var(--line-strong); background: var(--surface);
+    color: var(--ink); font-family: var(--sans); font-size:.85rem;
+  }
+  .progress-outer{ height:6px; border-radius:4px; background: var(--surface2); overflow:hidden; margin:10px 0 4px; }
+  .progress-inner{ height:100%; background: var(--accent); border-radius:4px; transition: width .3s ease; }
+  .progress-label{ font-size:.7rem; color:var(--muted); margin-bottom:18px; }
+
+  .book-group{ margin-bottom:18px; }
+  .book-group h3{
+    font-family: var(--serif); font-weight:400; font-size:.98rem; margin:0 0 8px;
+    color: var(--ink); display:flex; align-items:center; gap:7px;
+  }
+  .book-group h3 .tdot{ width:7px; height:7px; border-radius:50%; }
+  .book-group h3 .tdot.AT{ background: var(--at); }
+  .book-group h3 .tdot.NT{ background: var(--nt); }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:7px; }
+  .chip{
+    padding:7px 11px; border-radius:8px; border:1px solid var(--line-strong);
+    background: var(--surface); font-size:.78rem; color: var(--ink); cursor:pointer;
+    display:flex; align-items:center; gap:5px;
+  }
+  .chip:hover{ border-color:var(--accent); }
+  .chip .rd{ color: var(--accent-bright); font-size:.7rem; }
+  .chip .parts{ color: var(--muted); font-size:.65rem; }
+
+  .result-row, .list-row{
+    padding:11px 0; border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  .result-row .rr-ref, .list-row .lr-ref{ font-size:.82rem; color: var(--accent-bright); margin-bottom:3px; }
+  .result-row .rr-snip, .list-row .lr-snip{ font-size:.85rem; color: var(--muted); font-family: var(--serif); line-height:1.5; }
+  .result-row mark, .list-row mark{ background: var(--hl-yellow); color:inherit; border-radius:3px; }
+  .empty-hint{ color: var(--muted); font-size:.82rem; padding: 20px 0; text-align:center; }
+
+  /* ---------- Meine Bibel ---------- */
+  .subtabs{ display:flex; gap:18px; border-bottom:1px solid var(--line); margin-bottom:14px; }
+  .subtabs button{
+    background:none; border:none; padding:0 0 9px; color:var(--muted); font-size:.82rem; cursor:pointer; position:relative;
+  }
+  .subtabs button.active{ color:var(--ink); }
+  .subtabs button.active::after{ content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:var(--accent); }
+  .sub-panel{ display:none; }
+  .sub-panel.active{ display:block; }
+  .random-btn{
+    width:100%; padding:13px; margin-bottom:18px; border-radius:9px; cursor:pointer;
+    border:1px dashed var(--line-strong); background:none; color: var(--muted); font-size:.85rem;
+  }
+  .random-btn:hover{ color:var(--accent-bright); border-color:var(--accent); }
+
+  /* ---------- Mehr / Einstellungen ---------- */
+  .settings-section{ margin-bottom:26px; }
+  .settings-section h3{
+    font-family: var(--serif); font-weight:400; font-size:1rem; margin:0 0 12px; color:var(--ink);
+  }
+  .btn-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .btn-row button{
+    padding:9px 14px; border-radius:8px; border:1px solid var(--line-strong);
+    background:none; color:var(--muted); font-size:.8rem; cursor:pointer;
+  }
+  .btn-row button.active{ color:var(--accent-bright); border-color:var(--accent); background:rgba(143,179,194,.08); }
+  .btn-row button:hover{ color:var(--accent-bright); }
+  .info-text{ font-size:.82rem; line-height:1.65; color:var(--muted); }
+  .info-text b{ color:var(--ink); font-weight:600; }
+  .danger-btn{ color:#c98a6a !important; }
+  .file-import-label{
+    display:inline-block; padding:9px 14px; border-radius:8px; border:1px solid var(--line-strong);
+    color:var(--muted); font-size:.8rem; cursor:pointer;
+  }
+  .file-import-label:hover{ color:var(--accent-bright); }
+  .stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .stat-box{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .stat-box .n{ font-family:var(--serif); font-size:1.3rem; color:var(--accent-bright); }
+  .stat-box .l{ font-size:.68rem; color:var(--muted); margin-top:2px; }
+
+  /* ---------- Overlay ---------- */
+  .overlay{
+    position:fixed; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(2px);
+    display:none; align-items:flex-start; justify-content:center; z-index:60; padding: 40px 16px;
+    overflow-y:auto;
+  }
+  .overlay.show{ display:flex; }
+  .overlay-inner{
+    width:100%; max-width:460px; background: var(--bg); border:1px solid var(--line-strong);
+    border-radius:14px; padding:24px 20px 28px; position:relative; margin-top: 10px;
+  }
+  .overlay-close{
+    position:absolute; top:12px; right:14px; background:none; border:none;
+    color:var(--muted); font-size:1.1rem; cursor:pointer;
+  }
+  .overlay-close:hover{ color: var(--ink); }
+
+  .toast{
+    position:fixed; left:50%; bottom:96px; transform:translateX(-50%) translateY(20px);
+    background: var(--surface2); border:1px solid var(--line-strong); color:var(--ink);
+    font-size:.78rem; padding:9px 16px; border-radius:20px; opacity:0; pointer-events:none;
+    transition: opacity .25s ease, transform .25s ease; z-index:80;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  footer{ text-align:center; margin-top:6px; }
+  footer button{
+    background:none; border:none; color:var(--muted); font-family: var(--sans);
+    font-size:.73rem; text-decoration:underline; text-underline-offset:2px; cursor:pointer;
+  }
+  footer button:hover{ color:var(--accent); }
+</style>
+</head>
+<body data-fontsize="md" data-fontstyle="serif">
+<div class="app">
+  <header>
+    <h1>Zwei Minuten Bibel</h1>
+    <p>Elberfelder Bibel 1905 · vollständig offline · <span id="chapterCountLabel">–</span> Abschnitte</p>
+  </header>
+
+  <!-- ================= TAB: HEUTE ================= -->
+  <section class="view active" id="view-heute">
+    <div class="stats">
+      <div class="stat"><div class="num" id="streakNum">0</div><div class="lbl">Tage Streak</div></div>
+      <div class="stat"><div class="num" id="totalNum">0</div><div class="lbl">gelesene Tage</div></div>
+    </div>
+
+    <div class="cal-strip" id="calStrip" title="Die letzten 14 Tage"></div>
+
+    <div class="quote-card">
+      <div class="quote-label">Vers des Tages</div>
+      <div class="quote-text" id="votdText">–</div>
+      <div class="quote-ref" id="votdRef"></div>
+      <button class="qbtn" id="votdOpenBtn">Abschnitt öffnen ›</button>
+    </div>
+
+    <div class="toggle-row" id="testToggle">
+      <button data-filter="AT">Altes Testament</button>
+      <button data-filter="ALL" class="active">Beide</button>
+      <button data-filter="NT">Neues Testament</button>
+    </div>
+    <div class="mode-row" id="modeToggle">
+      <button data-mode="sequential" class="active">Fortlaufend</button>
+      <button data-mode="random">Zufällig</button>
+    </div>
+
+    <button class="go-button" id="goBtn">Heute lesen</button>
+
+    <div class="passage" id="passageHeute"></div>
+  </section>
+
+  <!-- ================= TAB: BIBLIOTHEK ================= -->
+  <section class="view" id="view-bibliothek">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="In der Bibel suchen …" autocomplete="off">
+    </div>
+    <div id="searchResults"></div>
+
+    <div id="libraryDefault">
+      <div class="progress-outer"><div class="progress-inner" id="libProgressBar"></div></div>
+      <div class="progress-label" id="libProgressLabel"></div>
+      <div id="bookTree"></div>
+    </div>
+  </section>
+
+  <!-- ================= TAB: MEINE BIBEL ================= -->
+  <section class="view" id="view-meinebibel">
+    <button class="random-btn" id="randomVerseBtn">🎲 Zufallsvers anzeigen</button>
+
+    <div class="subtabs" id="subtabs">
+      <button data-sub="fav" class="active">Favoriten</button>
+      <button data-sub="notes">Notizen</button>
+      <button data-sub="history">Verlauf</button>
+    </div>
+
+    <div class="sub-panel active" id="subFav"></div>
+    <div class="sub-panel" id="subNotes"></div>
+    <div class="sub-panel" id="subHistory"></div>
+  </section>
+
+  <!-- ================= TAB: MEHR ================= -->
+  <section class="view" id="view-mehr">
+
+    <div class="settings-section">
+      <h3>Darstellung</h3>
+      <p class="info-text" style="margin-bottom:8px;">Thema</p>
+      <div class="btn-row" id="themeRow">
+        <button data-theme="dark">Dunkel</button>
+        <button data-theme="light">Hell</button>
+        <button data-theme="sepia">Sepia</button>
+        <button data-theme="night">🌙 Nacht</button>
+      </div>
+      <label style="display:flex; align-items:center; gap:9px; margin-top:12px; font-size:.8rem; color:var(--muted); cursor:pointer;">
+        <input type="checkbox" id="autoNightToggle" style="width:16px;height:16px; accent-color:var(--accent);">
+        Nachtmodus abends automatisch aktivieren (21–7 Uhr)
+      </label>
+      <p class="info-text" id="autoNightStatus" style="margin-top:6px; display:none;"></p>
+      <p class="info-text" style="margin:16px 0 8px;">Schriftgröße</p>
+      <div class="btn-row" id="fontSizeRow">
+        <button data-size="sm">Klein</button>
+        <button data-size="md">Mittel</button>
+        <button data-size="lg">Groß</button>
+        <button data-size="xl">Sehr groß</button>
+      </div>
+      <p class="info-text" style="margin:16px 0 8px;">Schriftart</p>
+      <div class="btn-row" id="fontStyleRow">
+        <button data-fstyle="serif">Serif</button>
+        <button data-fstyle="sans">Serifenlos</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Statistik</h3>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="n" id="statChapters">–</div><div class="l">Abschnitte in der App</div></div>
+        <div class="stat-box"><div class="n" id="statRead">–</div><div class="l">davon gelesen</div></div>
+        <div class="stat-box"><div class="n" id="statFav">–</div><div class="l">markierte Favoriten</div></div>
+        <div class="stat-box"><div class="n" id="statNotes">–</div><div class="l">eigene Notizen</div></div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Daten &amp; Sicherung</h3>
+      <p class="info-text" style="margin-bottom:10px;">Alle Daten (Streak, Favoriten, Notizen, Markierungen) liegen ausschließlich lokal auf diesem Gerät im Browser. Mit „Sichern“ kannst du sie als Datei speichern und später wieder einspielen.</p>
+      <div class="btn-row">
+        <button id="exportBtn">⬇ Sichern (Export)</button>
+        <label class="file-import-label" for="importFile">⬆ Wiederherstellen (Import)</label>
+        <input type="file" id="importFile" accept="application/json" style="display:none;">
+      </div>
+      <div style="margin-top:14px;">
+        <button class="danger-btn" id="resetBtn" style="border:1px solid var(--line-strong); background:none; padding:9px 14px; border-radius:8px; cursor:pointer; font-size:.8rem;">Alles zurücksetzen</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Als App installieren (Android)</h3>
+      <p class="info-text" style="margin-bottom:10px;">Diese Seite ist eine einzelne Datei ohne Internetzugriff. Genau deshalb lässt sie sich nicht aus einem App Store laden, aber ganz normal über Chrome zum Startbildschirm hinzufügen – danach startet sie wie eine eigene App, ohne Adressleiste.</p>
+      <ol style="margin:0 0 10px; padding-left:20px; font-size:.82rem; line-height:1.75; color:var(--muted);">
+        <li>Öffne die Datei <b style="color:var(--ink);">Bibel.html</b> auf deinem Android-Gerät in <b style="color:var(--ink);">Chrome</b> (z. B. aus der Dateien-App, einer E-Mail oder Cloud-Ablage antippen).</li>
+        <li>Tippe oben rechts auf die drei Punkte <b style="color:var(--ink);">⋮</b>.</li>
+        <li>Wähle <b style="color:var(--ink);">„Zum Startbildschirm hinzufügen“</b> bzw. <b style="color:var(--ink);">„App installieren“</b>.</li>
+        <li>Bestätige mit <b style="color:var(--ink);">„Hinzufügen“</b>. Auf dem Homescreen erscheint das Buch-Icon der App.</li>
+      </ol>
+      <p class="info-text">Alle Inhalte sind bereits in der Datei enthalten, du brauchst danach kein Internet mehr – auch nicht beim allerersten Start.</p>
+    </div>
+
+    <div class="settings-section">
+      <h3>Über diese App</h3>
+      <p class="info-text">
+        <b>Text:</b> Elberfelder Bibel, unrevidierte Ausgabe 1905 (gemeinfrei). Die Kapitel sind nach bestem Wissen wiedergegeben; für zitierfähige oder liturgische Zwecke empfiehlt sich ein Abgleich mit einer Druck- oder geprüften Digitalausgabe.<br><br>
+        <b>Offline:</b> Diese Seite lädt keinerlei externe Inhalte nach dem ersten Öffnen und funktioniert vollständig ohne Internetverbindung – auch im Flugmodus.<br><br>
+        <b>Datenschutz:</b> Es werden keine Daten an einen Server gesendet. Alles bleibt im lokalen Speicher (localStorage) deines Browsers, bis du „Zurücksetzen“ wählst.<br><br>
+        <b>Bedienung:</b> Tippe auf eine Versnummer, um sie als Favorit zu markieren, oder aktiviere den Textmarker-Modus, um Verse farbig hervorzuheben. Mit den Pfeiltasten ← → kannst du bei geöffnetem Abschnitt blättern.<br><br>
+        <b>Nachtmodus:</b> Das Thema „Nacht“ verzichtet bewusst auf Weiß- und Blautöne (tiefschwarzer Hintergrund, warme Amber-Schrift) und reduziert so das ausgestrahlte blaue Licht beim Lesen am Abend. Unter „Mehr“ kann es zeitgesteuert automatisch aktiviert werden.
+      </p>
+    </div>
+
+  </section>
+
+  <nav class="tabbar">
+    <button data-tab="heute" class="active"><span class="ic">📖</span><span>Heute</span></button>
+    <button data-tab="bibliothek"><span class="ic">📚</span><span>Bibliothek</span></button>
+    <button data-tab="meinebibel"><span class="ic">⭐</span><span>Meine Bibel</span></button>
+    <button data-tab="mehr"><span class="ic">⚙️</span><span>Mehr</span></button>
+  </nav>
+</div>
+
+<div class="overlay" id="passageOverlay">
+  <div class="overlay-inner">
+    <button class="overlay-close" id="overlayClose">✕</button>
+    <div class="passage" id="passageOverlayContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================================
+   Bibeltext-Daten (Elberfelder Bibel 1905, gemeinfrei)
+   ========================================================================= */
+const CHAPTERS = [
+
+/* ---------------- Altes Testament ---------------- */
+{test:"AT", ref:"1. Mose 1", verses:[
+[1,`Im Anfang schuf Gott die Himmel und die Erde.`],
+[2,`Und die Erde war wüst und leer, und Finsternis war über der Tiefe; und der Geist Gottes schwebte über den Wassern.`],
+[3,`Und Gott sprach: Es werde Licht! und es ward Licht.`],
+[4,`Und Gott sah das Licht, daß es gut war; und Gott schied das Licht von der Finsternis.`],
+[5,`Und Gott nannte das Licht Tag, und die Finsternis nannte er Nacht. Und es ward Abend und es ward Morgen: erster Tag.`],
+[6,`Und Gott sprach: Es werde eine Ausdehnung inmitten der Wasser, und sie scheide die Wasser von den Wassern!`],
+[7,`Und Gott machte die Ausdehnung und schied die Wasser, welche unterhalb der Ausdehnung, von den Wassern, die oberhalb der Ausdehnung sind. Und es ward also.`],
+[8,`Und Gott nannte die Ausdehnung Himmel. Und es ward Abend und es ward Morgen: zweiter Tag.`],
+[9,`Und Gott sprach: Es sammeln sich die Wasser unterhalb des Himmels an einen Ort, und es werde sichtbar das Trockene! Und es ward also.`],
+[10,`Und Gott nannte das Trockene Erde, und die Sammlung der Wasser nannte er Meere. Und Gott sah, daß es gut war.`],
+[11,`Und Gott sprach: Die Erde lasse Gras hervorsprossen, Kraut, das Samen hervorbringe, Fruchtbäume, die Frucht tragen nach ihrer Art, in welcher ihr Same sei auf der Erde! Und es ward also.`],
+[12,`Und die Erde brachte Gras hervor, Kraut, das Samen hervorbringt nach seiner Art, und Bäume, die Frucht tragen, in welcher ihr Same ist nach ihrer Art. Und Gott sah, daß es gut war.`],
+[13,`Und es ward Abend und es ward Morgen: dritter Tag.`],
+[14,`Und Gott sprach: Es werden Lichter an der Ausdehnung des Himmels, um den Tag von der Nacht zu scheiden, und sie seien zu Zeichen und zur Bestimmung von Zeiten und Tagen und Jahren;`],
+[15,`und sie seien zu Lichtern an der Ausdehnung des Himmels, um auf die Erde zu leuchten! Und es ward also.`],
+[16,`Und Gott machte die zwei großen Lichter: das größere Licht zur Beherrschung des Tages, und das kleinere Licht zur Beherrschung der Nacht, und die Sterne.`],
+[17,`Und Gott setzte sie an die Ausdehnung des Himmels, um auf die Erde zu leuchten,`],
+[18,`und den Tag und die Nacht zu beherrschen und das Licht von der Finsternis zu scheiden. Und Gott sah, daß es gut war.`],
+[19,`Und es ward Abend und es ward Morgen: vierter Tag.`],
+[20,`Und Gott sprach: Es wimmeln die Wasser vom Gewimmel lebendiger Wesen, und Gevögel fliege über der Erde angesichts der Ausdehnung des Himmels!`],
+[21,`Und Gott schuf die großen Wasserungeheuer und jedes sich regende lebendige Wesen, wovon die Wasser wimmeln, nach ihrer Art, und jedes geflügelte Gevögel nach seiner Art. Und Gott sah, daß es gut war.`],
+[22,`Und Gott segnete sie und sprach: Seid fruchtbar und mehret euch und füllet die Wasser in den Meeren, und das Gevögel mehre sich auf der Erde!`],
+[23,`Und es ward Abend und es ward Morgen: fünfter Tag.`],
+[24,`Und Gott sprach: Die Erde bringe hervor lebendige Wesen nach ihrer Art, Vieh und Gewürm und Getier der Erde nach seiner Art! Und es ward also.`],
+[25,`Und Gott machte das Getier der Erde nach seiner Art, und das Vieh nach seiner Art, und alles Gewürm des Erdbodens nach seiner Art. Und Gott sah, daß es gut war.`],
+[26,`Und Gott sprach: Lasset uns Menschen machen in unserem Bilde, nach unserem Gleichnis; und sie sollen herrschen über die Fische des Meeres und über das Gevögel des Himmels und über das Vieh und über die ganze Erde und über alles Gewürm, das sich auf der Erde regt!`],
+[27,`Und Gott schuf den Menschen in seinem Bilde, im Bilde Gottes schuf er ihn; Mann und Weib schuf er sie.`],
+[28,`Und Gott segnete sie, und Gott sprach zu ihnen: Seid fruchtbar und mehret euch und füllet die Erde und machet sie euch untertan, und herrschet über die Fische des Meeres und über das Gevögel des Himmels und über alles Getier, das sich auf der Erde regt!`],
+[29,`Und Gott sprach: Siehe, ich habe euch alles Kraut gegeben, das Samen trägt auf der ganzen Erde, und jeden Baum, an welchem Fruchtbäume sind, die Samen tragen; euch sei es zur Speise.`],
+[30,`Und jedem Tiere der Erde und allem Gevögel des Himmels und allem, was sich auf der Erde regt, in welchem eine lebendige Seele ist, habe ich alles grüne Kraut zur Speise gegeben. Und es ward also.`],
+[31,`Und Gott sah alles, was er gemacht hatte, und siehe, es war sehr gut. Und es ward Abend und es ward Morgen: der sechste Tag.`]
+]},
+{test:"AT", ref:"1. Mose 3", verses:[
+[1,`Die Schlange aber war listiger als alles Getier des Feldes, das Jehova Gott gemacht hatte; und sie sprach zu dem Weibe: Hat Gott wirklich gesagt: Ihr sollt nicht essen von jedem Baume des Gartens?`],
+[2,`Und das Weib sprach zu der Schlange: Von der Frucht der Bäume des Gartens essen wir;`],
+[3,`aber von der Frucht des Baumes, der in der Mitte des Gartens ist, hat Gott gesagt: Ihr sollt nicht davon essen und sie nicht anrühren, damit ihr nicht sterbet!`],
+[4,`Da sprach die Schlange zu dem Weibe: Mit nichten werdet ihr sterben!`],
+[5,`Sondern Gott weiß, daß, welches Tages ihr davon esset, eure Augen aufgetan werden, und ihr sein werdet wie Gott, erkennend Gutes und Böses.`],
+[6,`Und das Weib sah, daß der Baum gut zur Speise, und daß er eine Lust für die Augen und daß der Baum begehrenswert wäre, um Einsicht zu geben; und sie nahm von seiner Frucht und aß, und sie gab auch ihrem Manne mit ihr, und er aß.`],
+[7,`Da wurden ihrer beiden Augen aufgetan, und sie erkannten, daß sie nackt waren; und sie hefteten Feigenblätter zusammen und machten sich Schürzen.`],
+[8,`Und sie hörten die Stimme Jehovas Gottes, der im Garten wandelte bei der Kühle des Tages. Und der Mensch und sein Weib versteckten sich vor dem Angesicht Jehovas Gottes mitten in die Bäume des Gartens.`],
+[9,`Und Jehova Gott rief den Menschen und sprach zu ihm: Wo bist du?`],
+[10,`Und er sprach: Ich hörte deine Stimme im Garten und fürchtete mich, denn ich bin nackt; und ich versteckte mich.`],
+[11,`Und er sprach: Wer hat dir kundgetan, daß du nackt bist? Hast du gegessen von dem Baume, von dem ich dir geboten habe, nicht zu essen?`],
+[12,`Da sprach der Mensch: Das Weib, das du mir beigesellt hast, sie gab mir von dem Baume, und ich aß.`],
+[13,`Da sprach Jehova Gott zu dem Weibe: Was hast du da getan! Und das Weib sprach: Die Schlange betrog mich, und ich aß.`],
+[14,`Da sprach Jehova Gott zu der Schlange: Weil du dieses getan hast, sollst du verflucht sein vor allem Vieh und vor allem Getier des Feldes! Auf deinem Bauche sollst du kriechen, und Staub sollst du essen alle Tage deines Lebens.`],
+[15,`Und ich werde Feindschaft setzen zwischen dir und dem Weibe und zwischen deinem Samen und ihrem Samen; er wird dir den Kopf zermalmen, und du, du wirst ihm die Ferse zermalmen.`],
+[16,`Zu dem Weibe sprach er: Ich werde sehr mehren die Mühsal deiner Schwangerschaft, mit Schmerzen sollst du Kinder gebären; und nach deinem Manne wird dein Verlangen sein, er aber wird über dich herrschen.`],
+[17,`Und zu Adam sprach er: Weil du auf die Stimme deines Weibes gehört und gegessen hast von dem Baume, von dem ich dir geboten und gesagt habe: Du sollst nicht davon essen, so sei der Erdboden verflucht um deinetwillen; mit Mühsal sollst du davon essen alle Tage deines Lebens.`],
+[18,`Und Dornen und Disteln wird er dir sprossen lassen, und du wirst das Kraut des Feldes essen.`],
+[19,`Im Schweiße deines Angesichts sollst du dein Brot essen, bis du zurückkehrst zur Erde, denn von ihr bist du genommen; denn Staub bist du, und zum Staube wirst du zurückkehren.`],
+[20,`Und der Mensch gab seinem Weibe den Namen Eva, weil sie die Mutter aller Lebendigen war.`],
+[21,`Und Jehova Gott machte Adam und seinem Weibe Röcke von Fell und bekleidete sie.`],
+[22,`Und Jehova Gott sprach: Siehe, der Mensch ist geworden wie unsereiner, zu erkennen Gutes und Böses. Und nun, daß er nicht seine Hand ausstrecke und nehme auch von dem Baume des Lebens und esse und lebe ewiglich!`],
+[23,`Und Jehova Gott schickte ihn aus dem Garten Eden hinaus, um den Erdboden zu bebauen, davon er genommen war.`],
+[24,`Und er trieb den Menschen aus, und stellte östlich vom Garten Eden die Cherubim und die Flamme des kreisenden Schwertes, um den Weg zum Baume des Lebens zu bewahren.`]
+]},
+{test:"AT", ref:"1. Mose 22", verses:[
+[1,`Und es geschah nach diesen Dingen, da versuchte Gott den Abraham und sprach zu ihm: Abraham! Und er sprach: Hier bin ich.`],
+[2,`Und er sprach: Nimm doch deinen Sohn, deinen einzigen, den du lieb hast, den Isaak, und gehe hin in das Land Morija und opfere ihn daselbst als Brandopfer auf einem der Berge, den ich dir sagen werde.`],
+[3,`Und Abraham stand des Morgens früh auf und sattelte seinen Esel und nahm zwei seiner Knaben mit sich und Isaak, seinen Sohn; und er spaltete Holz zum Brandopfer und machte sich auf und ging hin an den Ort, den Gott ihm gesagt hatte.`],
+[4,`Am dritten Tage, da hob Abraham seine Augen auf und sah die Stätte von ferne.`],
+[5,`Und Abraham sprach zu seinen Knaben: Bleibet ihr hier mit dem Esel, und ich und der Knabe, wir wollen dorthin gehen; und wenn wir angebetet haben, wollen wir wieder zu euch kommen.`],
+[6,`Und Abraham nahm das Holz zum Brandopfer und legte es auf Isaak, seinen Sohn, und er nahm das Feuer und das Messer in seine Hand, und sie gingen beide miteinander.`],
+[7,`Und Isaak sprach zu Abraham, seinem Vater, und sagte: Mein Vater! Und er sprach: Hier bin ich, mein Sohn. Und er sprach: Siehe, das Feuer und das Holz; wo ist aber das Lamm zum Brandopfer?`],
+[8,`Und Abraham sprach: Gott wird sich ersehen das Lamm zum Brandopfer, mein Sohn. So gingen sie beide miteinander.`],
+[9,`Und sie kamen an den Ort, den Gott ihm gesagt hatte; und Abraham baute daselbst den Altar und schichtete das Holz; und er band Isaak, seinen Sohn, und legte ihn auf den Altar, oben auf das Holz.`],
+[10,`Und Abraham streckte seine Hand aus und nahm das Messer, um seinen Sohn zu schlachten.`],
+[11,`Da rief ihm der Engel Jehovas vom Himmel zu und sprach: Abraham, Abraham! Und er sprach: Hier bin ich.`],
+[12,`Und er sprach: Strecke deine Hand nicht aus an den Knaben und tue ihm nichts; denn nun weiß ich, daß du Gott fürchtest und hast deinen Sohn, deinen einzigen, mir nicht vorenthalten.`],
+[13,`Und Abraham hob seine Augen auf und sah sich um, und siehe, ein Widder war hinter ihm im Dickicht mit seinen Hörnern gefangen; und Abraham ging hin und nahm den Widder und opferte ihn als Brandopfer an seines Sohnes Statt.`],
+[14,`Und Abraham gab diesem Ort den Namen: Jehova wird ersehen; daher man heutigen Tages sagt: Auf dem Berge Jehovas wird ersehen werden.`],
+[15,`Und der Engel Jehovas rief Abraham zum zweiten Male vom Himmel zu und sprach:`],
+[16,`Ich habe bei mir selbst geschworen, spricht Jehova, weil du diese Sache getan und deinen Sohn, deinen einzigen, nicht vorenthalten hast,`],
+[17,`daß ich dich reichlich segnen und deinen Samen sehr mehren werde, wie die Sterne des Himmels und wie der Sand am Ufer des Meeres; und dein Same wird das Tor seiner Feinde besitzen.`],
+[18,`Und in deinem Samen werden gesegnet werden alle Nationen der Erde, weil du meiner Stimme gehorcht hast.`],
+[19,`Und Abraham kehrte zu seinen Knaben zurück, und sie machten sich auf und gingen miteinander nach Beerseba; und Abraham wohnte zu Beerseba.`]
+]},
+{test:"AT", ref:"2. Mose 20", verses:[
+[1,`Und Gott redete alle diese Worte und sprach:`],
+[2,`Ich bin Jehova, dein Gott, der ich dich herausgeführt habe aus dem Lande Ägypten, aus dem Hause der Knechtschaft.`],
+[3,`Du sollst keine anderen Götter haben neben mir.`],
+[4,`Du sollst dir kein geschnitztes Bild machen, noch irgend ein Gleichnis dessen, was oben im Himmel und was unten auf der Erde und was in den Wassern unter der Erde ist.`],
+[5,`Du sollst dich nicht vor ihnen niederbeugen und ihnen nicht dienen; denn ich, Jehova, dein Gott, bin ein eifernder Gott, der die Ungerechtigkeit der Väter heimsucht an den Kindern, am dritten und am vierten Glied derer, die mich hassen,`],
+[6,`und der Güte erweist an Tausenden, die mich lieben und meine Gebote beobachten.`],
+[7,`Du sollst den Namen Jehovas, deines Gottes, nicht eitel führen; denn Jehova wird den nicht für schuldlos halten, der seinen Namen eitel führt.`],
+[8,`Gedenke des Sabbathtages, ihn zu heiligen.`],
+[9,`Sechs Tage sollst du arbeiten und all dein Werk tun;`],
+[10,`aber der siebte Tag ist Sabbath dem Jehova, deinem Gott: du sollst keinerlei Werk tun, du und dein Sohn und deine Tochter, dein Knecht und deine Magd und dein Vieh, und dein Fremdling, der in deinen Toren ist.`],
+[11,`Denn in sechs Tagen hat Jehova den Himmel und die Erde gemacht, das Meer und alles, was in ihnen ist, und er ruhte am siebten Tage; darum segnete Jehova den Sabbathtag und heiligte ihn.`],
+[12,`Ehre deinen Vater und deine Mutter, auf daß deine Tage verlängert werden in dem Lande, das Jehova, dein Gott, dir gibt.`],
+[13,`Du sollst nicht töten.`],
+[14,`Du sollst nicht ehebrechen.`],
+[15,`Du sollst nicht stehlen.`],
+[16,`Du sollst kein falsches Zeugnis reden wider deinen Nächsten.`],
+[17,`Du sollst nicht begehren deines Nächsten Haus; du sollst nicht begehren deines Nächsten Weib, noch seinen Knecht, noch seine Magd, noch sein Rind, noch seinen Esel, noch alles, was dein Nächster hat.`]
+]},
+{test:"AT", ref:"Psalm 1", verses:[
+[1,`Glückselig der Mann, der nicht wandelt im Rate der Gottlosen, und nicht steht auf dem Wege der Sünder, und nicht sitzt auf dem Sitze der Spötter,`],
+[2,`sondern seine Lust hat am Gesetz Jehovas und über sein Gesetz sinnt Tag und Nacht!`],
+[3,`Und er ist wie ein Baum, gepflanzt an Wasserbächen, der seine Frucht bringt zu seiner Zeit, und dessen Blatt nicht verwelkt; und alles, was er tut, gelingt.`],
+[4,`Nicht so die Gottlosen, sondern sie sind wie die Spreu, die der Wind dahintreibt.`],
+[5,`Darum werden die Gottlosen nicht bestehen im Gericht, noch die Sünder in der Gemeinde der Gerechten.`],
+[6,`Denn Jehova kennt den Weg der Gerechten, aber der Weg der Gottlosen wird vergehen.`]
+]},
+{test:"AT", ref:"Psalm 8", verses:[
+[1,`Jehova, unser Herr, wie herrlich ist dein Name auf der ganzen Erde, der du deine Majestät gestellt hast über die Himmel!`],
+[2,`Aus dem Munde der Kinder und Säuglinge hast du Macht gegründet um deiner Bedränger willen, um zum Schweigen zu bringen den Feind und den Rachgierigen.`],
+[3,`Wenn ich anschaue deinen Himmel, deiner Finger Werk, den Mond und die Sterne, die du bereitet hast:`],
+[4,`Was ist der Mensch, daß du sein gedenkst, und des Menschen Sohn, daß du auf ihn achthast?`],
+[5,`Denn ein wenig hast du ihn unter die Engel erniedrigt; mit Herrlichkeit und Pracht hast du ihn gekrönt.`],
+[6,`Du hast ihn zum Herrscher gemacht über die Werke deiner Hände; alles hast du unter seine Füße gestellt:`],
+[7,`Schafe und Rinder allesamt und auch die Tiere des Feldes,`],
+[8,`den Vogel des Himmels und die Fische des Meeres, alles, was die Pfade der Meere durchwandert.`],
+[9,`Jehova, unser Herr, wie herrlich ist dein Name auf der ganzen Erde!`]
+]},
+{test:"AT", ref:"Psalm 23", verses:[
+[1,`Jehova ist mein Hirte, mir wird nichts mangeln.`],
+[2,`Er lagert mich auf grünen Auen, er führt mich zu stillen Wassern.`],
+[3,`Er erquickt meine Seele, er leitet mich in Pfaden der Gerechtigkeit um seines Namens willen.`],
+[4,`Auch wenn ich wanderte im Tale des Todesschattens, fürchte ich nichts Übles, denn du bist bei mir; dein Stecken und dein Stab, sie trösten mich.`],
+[5,`Du bereitest vor mir einen Tisch angesichts meiner Bedränger; du hast mit Öl gesalbt mein Haupt, mein Becher fließt über.`],
+[6,`Fürwahr, Güte und Huld werden mir folgen alle Tage meines Lebens, und ich werde wohnen im Hause Jehovas auf immerdar.`]
+]},
+{test:"AT", ref:"Psalm 91", verses:[
+[1,`Wer im Schutze des Höchsten wohnt, bleibt im Schatten des Allmächtigen.`],
+[2,`Ich sage von Jehova: Meine Zuflucht und meine Burg; mein Gott, auf ihn vertraue ich.`],
+[3,`Denn er wird dich erretten von der Schlinge des Vogelstellers, von der verderblichen Pest.`],
+[4,`Mit seinen Fittichen wird er dich decken, und du wirst Zuflucht finden unter seinen Flügeln; Wahrheit und Schild ist seine Treue.`],
+[5,`Du wirst dich nicht fürchten vor dem Schrecken der Nacht, vor dem Pfeile, der bei Tage fliegt,`],
+[6,`vor der Pest, die im Finstern wandelt, vor der Seuche, die am Mittag verwüstet.`],
+[7,`Tausend werden fallen an deiner Seite, und zehntausend an deiner Rechten, dich wird es nicht erreichen.`],
+[8,`Nur schauen wirst du es mit deinen Augen, und wirst sehen die Vergeltung der Gesetzlosen.`],
+[9,`Weil du Jehova, meine Zuflucht, den Höchsten, gesetzt hast zu deiner Wohnung,`],
+[10,`so wird dir kein Unglück widerfahren, und keine Plage deinem Zelte nahen;`],
+[11,`denn er wird seinen Engeln über dir befehlen, dich zu bewahren auf allen deinen Wegen.`],
+[12,`Auf den Händen werden sie dich tragen, damit du deinen Fuß nicht an einen Stein stoßest.`],
+[13,`Auf Löwen und Ottern wirst du treten, junge Löwen und Schlangen wirst du niedertreten.`],
+[14,`Weil er Wonne an mir hat, will ich ihn erretten; ich will ihn in Sicherheit setzen, weil er meinen Namen kennt.`],
+[15,`Er wird mich anrufen, und ich werde ihm antworten, ich bin bei ihm in der Bedrängnis; ich werde ihn befreien und ihn verherrlichen.`],
+[16,`Mit die Länge des Lebens werde ich ihn sättigen, und ich werde ihn schauen lassen meine Rettung.`]
+]},
+{test:"AT", ref:"Psalm 100", verses:[
+[1,`Jauchzet Jehova, ganze Erde!`],
+[2,`Dienet Jehova mit Freuden, kommet vor sein Angesicht mit Jubel!`],
+[3,`Erkennet, daß Jehova Gott ist! Er hat uns gemacht, und nicht wir selbst, zu seinem Volk und zu Schafen seiner Weide.`],
+[4,`Gehet ein in seine Tore mit Lob, in seine Vorhöfe mit Preisgesang! Preiset ihn, segnet seinen Namen!`],
+[5,`Denn gut ist Jehova; seine Güte währt ewiglich, und seine Treue von Geschlecht zu Geschlecht.`]
+]},
+{test:"AT", ref:"Psalm 121", verses:[
+[1,`Ich hebe meine Augen auf zu den Bergen: woher wird meine Hilfe kommen?`],
+[2,`Meine Hilfe kommt von Jehova, der Himmel und Erde gemacht hat.`],
+[3,`Er wird nicht zulassen, daß dein Fuß wanke; nicht schlummern wird, der dich behütet.`],
+[4,`Siehe, nicht schlummert noch schläft der Behüter Israels.`],
+[5,`Jehova ist dein Behüter, Jehova ist dein Schatten über deiner rechten Hand.`],
+[6,`Nicht wird die Sonne dich stechen des Tages, noch der Mond des Nachts.`],
+[7,`Jehova wird dich behüten vor allem Übel, er wird deine Seele behüten.`],
+[8,`Jehova wird behüten deinen Ausgang und deinen Eingang, von nun an bis in Ewigkeit.`]
+]},
+{test:"AT", ref:"Psalm 139", verses:[
+[1,`Jehova, du hast mich erforscht und erkannt.`],
+[2,`Du kennst mein Sitzen und mein Aufstehen, du verstehst meine Gedanken von ferne.`],
+[3,`Du sichtest mein Wandeln und mein Liegen und bist vertraut mit allen meinen Wegen.`],
+[4,`Denn das Wort ist noch nicht auf meiner Zunge, siehe, Jehova, du weißt es ganz.`],
+[5,`Von hinten und von vorn hast du mich eingeengt, und auf mich gelegt deine Hand.`],
+[6,`Zu wunderbar ist mir dieses Wissen, zu hoch, ich vermag es nicht zu erfassen.`],
+[7,`Wohin sollte ich gehen vor deinem Geiste, und wohin fliehen vor deinem Angesicht?`],
+[8,`Führe ich auf zum Himmel, du bist da; und bettete ich mir in dem Scheol, siehe, du bist da.`],
+[9,`Nähme ich Flügel der Morgenröte, ließe ich mich nieder am äußersten Ende des Meeres,`],
+[10,`auch dort würde deine Hand mich leiten, und deine Rechte mich fassen.`],
+[11,`Und spräche ich: Nur Finsternis möge mich bedecken, und Nacht werde das Licht um mich her:`],
+[12,`Auch Finsternis würde vor dir nicht verfinstern, und die Nacht würde leuchten wie der Tag, die Finsternis wäre wie das Licht.`],
+[13,`Denn du besaßest meine Nieren, du wobest mich in meiner Mutter Leibe.`],
+[14,`Ich preise dich darüber, daß ich auf eine erstaunliche, ausgezeichnete Weise gemacht bin; wunderbar sind deine Werke, und meine Seele weiß es sehr wohl.`],
+[15,`Nicht verhohlen war mein Gebein vor dir, als ich gemacht ward im Verborgenen, gewirkt wie mit der Nadel in den untersten Örtern der Erde.`],
+[16,`Deine Augen sahen mich, meinen faserartigen Stoff, und in dein Buch waren sie alle eingeschrieben, die Tage, die gebildet wurden, und keiner von ihnen war da.`],
+[17,`Und wie köstlich sind mir deine Gedanken, o Gott! wie gewaltig sind ihre Summen!`],
+[18,`Wollte ich sie zählen, ihrer sind mehr als des Sandes; erwache ich, so bin ich noch bei dir.`],
+[23,`Erforsche mich, Gott, und erkenne mein Herz; prüfe mich und erkenne meine Gedanken!`],
+[24,`Und sieh, ob ein Weg der Mühsal bei mir ist, und leite mich auf ewigem Wege!`]
+]},
+{test:"AT", ref:"Jesaja 40", verses:[
+[1,`Tröstet, tröstet mein Volk, spricht euer Gott.`],
+[2,`Redet zum Herzen Jerusalems und rufet ihm zu, daß sein Frondienst vollendet, daß seine Schuld beglichen ist; denn es hat von der Hand Jehovas Zwiefältiges empfangen für alle seine Sünden.`],
+[3,`Stimme eines Rufenden: In der Wüste bahnet den Weg Jehovas, ebnet in der Steppe eine Straße für unseren Gott!`],
+[4,`Jedes Tal soll erhöht und jeder Berg und Hügel erniedrigt werden; und das Höckerichte soll zur Ebene werden und das Hügelige zur Talebene.`],
+[5,`Und die Herrlichkeit Jehovas wird sich offenbaren, und alles Fleisch insgesamt wird sie sehen; denn der Mund Jehovas hat geredet.`],
+[6,`Stimme eines Sagenden: Rufe! Und ich sprach: Was soll ich rufen? Alles Fleisch ist Gras, und all seine Anmut wie die Blume des Feldes.`],
+[7,`Das Gras verdorrt, die Blume verwelkt, wenn der Hauch Jehovas darüber weht; wahrlich, das Volk ist Gras.`],
+[8,`Das Gras verdorrt, die Blume verwelkt; aber das Wort unseres Gottes besteht in Ewigkeit.`],
+[9,`Steige auf einen hohen Berg, Zion, du Verkündigerin froher Botschaft! Erhebe deine Stimme mit Macht, Jerusalem, du Verkündigerin froher Botschaft! Erhebe sie, fürchte dich nicht! Sprich zu den Städten Judas: Siehe, euer Gott!`],
+[10,`Siehe, der Herr, Jehova, kommt als ein Starker, und sein Arm herrscht für ihn; siehe, sein Lohn ist bei ihm, und seine Belohnung geht vor ihm her.`],
+[11,`Wie ein Hirte wird er seine Herde weiden, mit seinem Arm die Lämmer sammeln und im Busen tragen, die Säugenden wird er sanft leiten.`]
+]},
+{test:"AT", ref:"Jona 1", verses:[
+[1,`Und das Wort Jehovas geschah zu Jona, dem Sohne Amittais, also:`],
+[2,`Mache dich auf, gehe nach Ninive, der großen Stadt, und predige wider sie; denn ihre Bosheit ist heraufgekommen vor mein Angesicht.`],
+[3,`Und Jona machte sich auf, um von dem Angesicht Jehovas hinweg nach Tarsis zu fliehen; und er ging nach Japho hinab und fand ein Schiff, das nach Tarsis fuhr; und er gab sein Fährgeld und stieg in dasselbe hinab, um mit ihnen nach Tarsis zu fahren, hinweg von dem Angesicht Jehovas.`],
+[4,`Aber Jehova warf einen großen Wind auf das Meer, und es entstand ein großer Sturm auf dem Meere, so daß das Schiff zu zerbrechen drohte.`],
+[5,`Und die Seeleute fürchteten sich und schrieen ein jeder zu seinem Gott, und sie warfen die Geräte, die im Schiffe waren, ins Meer, um es sich zu erleichtern. Jona aber war in den unteren Schiffsraum hinabgestiegen und hatte sich hingelegt und war in tiefen Schlaf gesunken.`],
+[6,`Und der Schiffsobmann trat zu ihm hin und sprach zu ihm: Was ist mit dir, du Schläfer? Stehe auf, rufe zu deinem Gott! Vielleicht wird der Gott unser gedenken, daß wir nicht umkommen.`],
+[7,`Und einer sprach zum anderen: Kommt und laßt uns Lose werfen, damit wir erfahren, um wessentwillen dieses Unglück uns trifft. Und sie warfen Lose, und das Los fiel auf Jona.`],
+[8,`Da sprachen sie zu ihm: Tue uns doch kund, um wessentwillen uns dieses Unglück trifft! Was ist dein Geschäft, und woher kommst du? Welches ist dein Land, und von welchem Volke bist du?`],
+[9,`Und er sprach zu ihnen: Ich bin ein Hebräer und fürchte Jehova, den Gott des Himmels, der das Meer und das Trockene gemacht hat.`],
+[10,`Da fürchteten sich die Männer mit großer Furcht und sprachen zu ihm: Was hast du da getan! Denn die Männer wußten, daß er von dem Angesicht Jehovas floh; denn er hatte es ihnen kundgetan.`],
+[11,`Und sie sprachen zu ihm: Was sollen wir dir tun, damit das Meer sich gegen uns beruhige? Denn das Meer wurde immer stürmischer.`],
+[12,`Und er sprach zu ihnen: Nehmet mich und werfet mich ins Meer, so wird das Meer sich gegen euch beruhigen; denn ich weiß, daß um meinetwillen dieser große Sturm über euch gekommen ist.`],
+[13,`Und die Männer ruderten hart, um das Schiff ans Land zurückzuführen; aber sie vermochten es nicht, denn das Meer wurde immer stürmischer wider sie.`],
+[14,`Da riefen sie zu Jehova und sprachen: Ach, Jehova! laß uns doch nicht umkommen um der Seele dieses Mannes willen, und lege nicht unschuldiges Blut auf uns; denn du, Jehova, hast getan, wie es dir gefallen hat.`],
+[15,`Und sie nahmen Jona und warfen ihn ins Meer. Da ließ das Meer ab von seinem Wüten.`],
+[16,`Und die Männer fürchteten Jehova mit großer Furcht, und sie schlachteten Jehova Schlachtopfer und taten Gelübde.`]
+]},
+{test:"AT", ref:"Jona 2", verses:[
+[1,`Und Jehova bestellte einen großen Fisch, um den Jona zu verschlingen; und Jona war im Bauche des Fisches drei Tage und drei Nächte.`],
+[2,`Und Jona betete zu Jehova, seinem Gott, aus dem Bauche des Fisches`],
+[3,`und sprach: Ich rief zu Jehova aus meiner Bedrängnis, und er antwortete mir; aus dem Schoße des Scheols schrie ich, du hörtest meine Stimme.`],
+[4,`Du hattest mich in die Tiefe geworfen, in das Herz der Meere, und der Strom umgab mich; alle deine Wogen und deine Wellen gingen über mich hin.`],
+[5,`Und ich sprach: Verstoßen bin ich aus deinen Augen; werde ich je wieder hinschauen nach deinem heiligen Tempel?`],
+[6,`Die Wasser umgaben mich bis an die Seele, die Tiefe umringte mich, Seegras war um mein Haupt geschlungen.`],
+[7,`Zu der Berge Gründen fuhr ich hinab; die Erde, ihre Riegel waren hinter mir auf ewig. Da führtest du mein Leben aus der Grube herauf, Jehova, mein Gott!`],
+[8,`Als meine Seele in mir verschmachtete, gedachte ich Jehovas, und mein Gebet kam zu dir, zu deinem heiligen Tempel.`],
+[9,`Die auf nichtige Götzen achten, verlassen ihre Gnade.`],
+[10,`Ich aber will dir opfern mit der Stimme des Lobes; was ich gelobt habe, will ich bezahlen. Bei Jehova ist die Rettung!`],
+[11,`Und Jehova sprach zu dem Fische, und er spie Jona aus auf das Trockene.`]
+]},
+{test:"AT", ref:"Jona 3", verses:[
+[1,`Und das Wort Jehovas geschah zum zweiten Male zu Jona also:`],
+[2,`Mache dich auf, gehe nach Ninive, der großen Stadt, und predige ihr die Predigt, die ich dir sagen werde.`],
+[3,`Da machte Jona sich auf und ging nach Ninive, nach dem Worte Jehovas. Ninive aber war eine große Stadt vor Gott, drei Tagereisen groß.`],
+[4,`Und Jona fing an, in die Stadt hineinzugehen, eine Tagereise weit, und er rief und sprach: Noch vierzig Tage, und Ninive wird umgekehrt werden!`],
+[5,`Und die Leute von Ninive glaubten Gott, und sie riefen ein Fasten aus und zogen Sacktuch an, vom Größten bis zum Kleinsten unter ihnen.`],
+[6,`Und das Wort gelangte zu dem König von Ninive; und er stand von seinem Throne auf und legte seinen Mantel von sich und bedeckte sich mit Sacktuch und setzte sich in Asche.`],
+[7,`Und er ließ ausrufen und sagen in Ninive, auf Befehl des Königs und seiner Großen, also: Menschen und Vieh, Rinder und Schafe sollen gar nichts kosten, sie sollen nicht weiden und kein Wasser trinken;`],
+[8,`und Menschen und Vieh sollen sich mit Sacktuch bedecken, und sie sollen ernstlich zu Gott rufen und umkehren, ein jeder von seinem bösen Wege und von dem Unrecht, das an seinen Händen klebt.`],
+[9,`Wer weiß? Gott könnte umkehren und es sich gereuen lassen und sich abwenden von der Glut seines Zornes, daß wir nicht umkämen.`],
+[10,`Und Gott sah ihre Werke, daß sie umkehrten von ihrem bösen Wege; und es gereute Gott des Übels, das er ihnen zu tun geredet hatte, und er tat es nicht.`]
+]},
+{test:"AT", ref:"Jona 4", verses:[
+[1,`Aber es verdroß Jona gar sehr, und er entbrannte vor Zorn.`],
+[2,`Und er betete zu Jehova und sprach: Ach, Jehova! War das nicht mein Wort, als ich noch in meinem Lande war? Darum kam ich zuvor zu entfliehen nach Tarsis; denn ich wußte, daß du ein gnädiger und barmherziger Gott bist, langsam zum Zorn und groß an Güte, und dem das Übel gereut.`],
+[3,`Und nun, Jehova, nimm doch meine Seele von mir; denn es ist besser für mich zu sterben als zu leben.`],
+[4,`Und Jehova sprach: Ist es recht, daß du entbrannt bist?`],
+[5,`Und Jona ging aus der Stadt hinaus und ließ sich nieder gegen Osten der Stadt; und er machte sich daselbst eine Hütte und setzte sich darunter in den Schatten, bis er sähe, was mit der Stadt geschehen würde.`],
+[6,`Und Jehova Gott bestellte einen Wunderbaum und ließ ihn über Jona aufwachsen, damit er Schatten über seinem Haupte gäbe, um ihn von seinem Übel zu erretten; und Jona freute sich über den Wunderbaum mit großer Freude.`],
+[7,`Aber Gott bestellte einen Wurm, als die Morgenröte am folgenden Tage aufging, und dieser stach den Wunderbaum, daß er verdorrte.`],
+[8,`Und es geschah, als die Sonne aufging, da bestellte Gott einen schwülen Ostwind, und die Sonne stach auf das Haupt Jonas, daß er ohnmächtig wurde; und er wünschte sich den Tod und sprach: Es ist besser für mich zu sterben als zu leben.`],
+[9,`Da sprach Gott zu Jona: Ist es recht, daß du entbrannt bist um des Wunderbaumes willen? Und er sprach: Ich habe recht, daß ich entbrannt bin bis zum Tode.`],
+[10,`Und Jehova sprach: Du erbarmst dich des Wunderbaumes, um den du dich nicht bemüht und den du nicht großgezogen hast, der in einer Nacht entstand und in einer Nacht umkam;`],
+[11,`und ich sollte mich nicht erbarmen über Ninive, die große Stadt, in welcher mehr als hundertzwanzigtausend Menschen sind, die nicht wissen zwischen ihrer Rechten und ihrer Linken zu unterscheiden, dazu viel Vieh?`]
+]},
+
+/* ---------------- Neues Testament ---------------- */
+{test:"NT", ref:"Matthäus 5", verses:[
+[1,`Als er aber die Volksmenge sah, stieg er auf den Berg; und als er sich gesetzt hatte, traten seine Jünger zu ihm.`],
+[2,`Und er tat seinen Mund auf, lehrte sie und sprach:`],
+[3,`Glückselig die Armen im Geiste, denn ihrer ist das Reich der Himmel.`],
+[4,`Glückselig die Trauernden, denn sie werden getröstet werden.`],
+[5,`Glückselig die Sanftmütigen, denn sie werden das Land ererben.`],
+[6,`Glückselig, die nach der Gerechtigkeit hungern und dürsten, denn sie werden gesättigt werden.`],
+[7,`Glückselig die Barmherzigen, denn ihnen wird Barmherzigkeit widerfahren.`],
+[8,`Glückselig, die reinen Herzens sind, denn sie werden Gott schauen.`],
+[9,`Glückselig die Friedensstifter, denn sie werden Söhne Gottes heißen.`],
+[10,`Glückselig die um Gerechtigkeit willen Verfolgten, denn ihrer ist das Reich der Himmel.`],
+[11,`Glückselig seid ihr, wenn sie euch schmähen und verfolgen und alles Böse lügnerisch wider euch reden werden um meinetwillen.`],
+[12,`Freuet euch und frohlocket, denn euer Lohn ist groß in den Himmeln; denn also haben sie die Propheten verfolgt, die vor euch waren.`],
+[13,`Ihr seid das Salz der Erde; wenn aber das Salz kraftlos geworden ist, womit soll es gesalzen werden? Es taugt zu nichts mehr, als hinausgeworfen und von den Menschen zertreten zu werden.`],
+[14,`Ihr seid das Licht der Welt; eine Stadt, die oben auf einem Berge liegt, kann nicht verborgen sein.`],
+[15,`Man zündet auch nicht eine Lampe an und setzt sie unter den Scheffel, sondern auf das Lampengestell, und sie leuchtet allen, die im Hause sind.`],
+[16,`Also lasset euer Licht leuchten vor den Menschen, damit sie eure guten Werke sehen und euren Vater, der in den Himmeln ist, verherrlichen.`],
+[17,`Wähnet nicht, daß ich gekommen sei, das Gesetz oder die Propheten aufzulösen; ich bin nicht gekommen, aufzulösen, sondern zu erfüllen.`],
+[18,`Denn wahrlich, ich sage euch: Bis daß der Himmel und die Erde vergehen, soll auch nicht ein Jota oder ein Strichlein von dem Gesetz vergehen, bis alles geschehen ist.`],
+[19,`Wer irgend nun eines dieser geringsten Gebote auflöst und also die Menschen lehrt, wird der Geringste heißen im Reiche der Himmel; wer irgend aber sie tut und lehrt, dieser wird groß heißen im Reiche der Himmel.`],
+[20,`Denn ich sage euch: Wenn nicht eure Gerechtigkeit vorzüglicher ist als die der Schriftgelehrten und Pharisäer, so werdet ihr nicht in das Reich der Himmel eingehen.`],
+[21,`Ihr habt gehört, daß zu den Alten gesagt ist: Du sollst nicht töten; wer aber irgend töten wird, wird dem Gericht verfallen sein.`],
+[22,`Ich aber sage euch, daß jeder, der seinem Bruder ohne Grund zürnt, dem Gericht verfallen sein wird.`],
+[23,`Wenn du nun deine Gabe darbringst zu dem Altar und dich daselbst erinnerst, daß dein Bruder etwas wider dich habe,`],
+[24,`so laß daselbst deine Gabe vor dem Altar und geh zuvor hin, versöhne dich mit deinem Bruder, und dann komm und bringe deine Gabe dar.`],
+[25,`Willfahre deiner Gegenpartei schnell, während du mit ihr auf dem Wege bist.`],
+[26,`Wahrlich, ich sage dir, du wirst nicht von dannen herauskommen, bis du auch den letzten Pfennig bezahlt hast.`],
+[27,`Ihr habt gehört, daß gesagt ist: Du sollst nicht ehebrechen.`],
+[28,`Ich aber sage euch, daß jeder, der ein Weib ansieht, ihrer zu begehren, schon Ehebruch mit ihr begangen hat in seinem Herzen.`],
+[29,`Wenn aber dein rechtes Auge dich ärgert, so reiß es aus und wirf es von dir; denn es ist dir nütze, daß eines deiner Glieder umkomme.`],
+[30,`Und wenn deine rechte Hand dich ärgert, so haue sie ab und wirf sie von dir.`],
+[31,`Es ist aber gesagt: Wer irgend sein Weib entlassen wird, gebe ihr einen Scheidebrief.`],
+[32,`Ich aber sage euch, daß jeder, der sein Weib entlassen wird, außer auf Grund von Hurerei, macht, daß sie Ehebruch begeht.`],
+[33,`Wiederum habt ihr gehört, daß zu den Alten gesagt ist: Du sollst nicht falsch schwören.`],
+[34,`Ich aber sage euch: Schwöret überhaupt nicht.`],
+[35,`Weder bei der Erde, denn sie ist seiner Füße Schemel; noch bei Jerusalem, denn sie ist des großen Königs Stadt.`],
+[36,`Auch bei deinem Haupte sollst du nicht schwören, denn du vermagst nicht, ein Haar weiß oder schwarz zu machen.`],
+[37,`Es sei aber eure Rede: Ja, ja; nein, nein; was aber mehr ist als dieses, ist aus dem Bösen.`],
+[38,`Ihr habt gehört, daß gesagt ist: Auge um Auge, und Zahn um Zahn.`],
+[39,`Ich aber sage euch, nicht zu widerstehen dem Bösen; sondern wer irgend dich auf deinen rechten Backen schlägt, dem biete auch den anderen dar.`],
+[40,`Und dem, der mit dir vor Gericht gehen und deinen Leibrock nehmen will, dem laß auch den Mantel.`],
+[41,`Und wer irgend dich zwingen wird, eine Meile zu gehen, mit dem gehe zwei.`],
+[42,`Gib dem, der dich bittet, und weise den nicht ab, der von dir borgen will.`],
+[43,`Ihr habt gehört, daß gesagt ist: Du sollst deinen Nächsten lieben und deinen Feind hassen.`],
+[44,`Ich aber sage euch: Liebet eure Feinde, segnet, die euch fluchen, tut wohl denen, die euch hassen, und betet für die, die euch beleidigen und verfolgen,`],
+[45,`damit ihr Söhne eures Vaters seid, der in den Himmeln ist; denn er läßt seine Sonne aufgehen über Böse und Gute und läßt regnen über Gerechte und Ungerechte.`],
+[46,`Denn wenn ihr liebet, die euch lieben, welchen Lohn habt ihr?`],
+[47,`Und wenn ihr eure Brüder allein grüßet, was tut ihr Besonderes?`],
+[48,`Ihr nun sollt vollkommen sein, wie euer himmlischer Vater vollkommen ist.`]
+]},
+{test:"NT", ref:"Matthäus 6", verses:[
+[1,`Habet acht, daß ihr euer Almosen nicht gebet vor den Menschen, um von ihnen gesehen zu werden.`],
+[2,`Wenn du nun Almosen gibst, sollst du nicht vor dir her posaunen lassen, wie die Heuchler tun.`],
+[3,`Wenn du aber Almosen gibst, so wisse deine Linke nicht, was deine Rechte tut,`],
+[4,`damit dein Almosen im Verborgenen sei, und dein Vater, der im Verborgenen sieht, wird dir öffentlich vergelten.`],
+[5,`Und wenn du betest, sollst du nicht sein wie die Heuchler; denn sie lieben es, in den Synagogen und an den Straßenecken stehend zu beten.`],
+[6,`Du aber, wenn du betest, so geh in deine Kammer und schließe deine Tür und bete zu deinem Vater, der im Verborgenen ist.`],
+[7,`Wenn ihr aber betet, plappert nicht wie die von den Nationen.`],
+[8,`Seid ihnen nun nicht gleich, denn euer Vater weiß, was ihr bedürfet, ehe ihr ihn bittet.`],
+[9,`Betet ihr nun also: Unser Vater, der du bist in den Himmeln, geheiligt werde dein Name;`],
+[10,`dein Reich komme; dein Wille geschehe, wie im Himmel also auch auf Erden.`],
+[11,`Unser tägliches Brot gib uns heute;`],
+[12,`und vergib uns unsere Schulden, wie auch wir vergeben unseren Schuldnern;`],
+[13,`und führe uns nicht in Versuchung, sondern errette uns von dem Bösen.`],
+[14,`Denn wenn ihr den Menschen ihre Vergehungen vergebet, so wird euer himmlischer Vater auch euch vergeben.`],
+[15,`Wenn ihr aber den Menschen nicht vergebet, so wird euer Vater eure Vergehungen auch nicht vergeben.`],
+[16,`Wenn ihr aber fastet, so sehet nicht düster aus wie die Heuchler.`],
+[17,`Du aber, wenn du fastest, so salbe dein Haupt und wasche dein Angesicht,`],
+[18,`damit du nicht den Menschen als fastend erscheinest, sondern deinem Vater, der im Verborgenen ist.`],
+[19,`Sammelt euch nicht Schätze auf der Erde, wo Motte und Rost zerstört.`],
+[20,`Sammelt euch aber Schätze im Himmel, wo weder Motte noch Rost zerstört.`],
+[21,`Denn wo dein Schatz ist, da wird auch dein Herz sein.`],
+[22,`Die Lampe des Leibes ist das Auge; wenn nun dein Auge einfältig ist, so wird dein ganzer Leib licht sein.`],
+[23,`Wenn aber dein Auge böse ist, wird dein ganzer Leib finster sein.`],
+[24,`Niemand kann zwei Herren dienen; ihr könnt nicht Gott dienen und dem Mammon.`],
+[25,`Deshalb sage ich euch: Seid nicht besorgt für euer Leben, was ihr essen und was ihr trinken sollt.`],
+[26,`Sehet hin auf die Vögel des Himmels, daß sie nicht säen noch ernten, und euer himmlischer Vater ernährt sie doch.`],
+[27,`Wer aber unter euch vermag mit Sorgen seiner Größe eine Elle zuzusetzen?`],
+[28,`Und warum seid ihr um Kleidung besorgt? Betrachtet die Lilien des Feldes, wie sie wachsen.`],
+[29,`Ich sage euch aber, daß selbst nicht Salomon in all seiner Herrlichkeit bekleidet war wie eine von diesen.`],
+[30,`Wenn aber Gott das Gras des Feldes also kleidet, sollte er das nicht viel mehr euch tun, Kleingläubige?`],
+[31,`So seid nun nicht besorgt und saget nicht: Was sollen wir essen? oder: Was sollen wir trinken?`],
+[32,`Denn nach allem diesem trachten die Nationen; denn euer himmlischer Vater weiß, daß ihr dies alles bedürfet.`],
+[33,`Trachtet aber zuerst nach dem Reiche Gottes und nach seiner Gerechtigkeit, und dies alles wird euch hinzugefügt werden.`],
+[34,`So seid nun nicht besorgt auf den morgenden Tag, denn der morgende Tag wird für sich selbst sorgen.`]
+]},
+{test:"NT", ref:"Matthäus 7", verses:[
+[1,`Richtet nicht, auf daß ihr nicht gerichtet werdet.`],
+[2,`Denn mit welchem Gericht ihr richtet, werdet ihr gerichtet werden, und mit welchem Maße ihr messet, wird euch gemessen werden.`],
+[3,`Was aber siehst du den Splitter, der in deines Bruders Auge ist, den Balken aber in deinem Auge nimmst du nicht wahr?`],
+[4,`Oder wie wirst du zu deinem Bruder sagen: Erlaube, ich will den Splitter aus deinem Auge ziehen, und siehe, der Balken ist in deinem Auge?`],
+[5,`Heuchler, ziehe zuerst den Balken aus deinem Auge, und dann wirst du klar sehen, um den Splitter aus deines Bruders Auge zu ziehen.`],
+[6,`Gebet nicht das Heilige den Hunden, werfet auch nicht eure Perlen vor die Schweine.`],
+[7,`Bittet, und es wird euch gegeben werden; suchet, und ihr werdet finden; klopfet an, und es wird euch aufgetan werden.`],
+[8,`Denn jeder Bittende empfängt, und der Suchende findet, und dem Anklopfenden wird aufgetan werden.`],
+[9,`Oder welcher Mensch ist unter euch, der, wenn sein Sohn ihn um Brot bitten würde, ihm einen Stein geben wird?`],
+[10,`Oder auch, wenn er ihn um einen Fisch bitten würde, ihm eine Schlange geben wird?`],
+[11,`Wenn nun ihr, die ihr böse seid, euren Kindern gute Gaben zu geben wisset, wieviel mehr wird euer Vater, der in den Himmeln ist, Gutes geben denen, die ihn bitten!`],
+[12,`Alles nun, was ihr wollt, daß euch die Menschen tun sollen, das tut auch ihr ihnen; denn dies ist das Gesetz und die Propheten.`],
+[13,`Gehet ein durch die enge Pforte; denn weit ist die Pforte und breit der Weg, der zum Verderben führt, und viele sind, die durch dieselbe eingehen.`],
+[14,`Denn eng ist die Pforte und schmal der Weg, der zum Leben führt, und wenige sind, die ihn finden.`],
+[15,`Hütet euch aber vor den falschen Propheten, die in Schafskleidern zu euch kommen, inwendig aber sind sie reißende Wölfe.`],
+[16,`An ihren Früchten werdet ihr sie erkennen. Liest man auch von Dornen Trauben, oder von Disteln Feigen?`],
+[17,`So bringt jeder gute Baum gute Früchte, aber der schlechte Baum bringt schlechte Früchte.`],
+[18,`Ein guter Baum kann nicht schlechte Früchte bringen, noch ein schlechter Baum gute Früchte bringen.`],
+[19,`Jeder Baum, der nicht gute Frucht bringt, wird abgehauen und ins Feuer geworfen.`],
+[20,`Also werdet ihr sie an ihren Früchten erkennen.`],
+[21,`Nicht jeder, der zu mir sagt: Herr, Herr! wird in das Reich der Himmel eingehen, sondern wer den Willen meines Vaters tut, der in den Himmeln ist.`],
+[22,`Viele werden an jenem Tage zu mir sagen: Herr, Herr! haben wir nicht durch deinen Namen geweissagt, und durch deinen Namen Dämonen ausgetrieben, und durch deinen Namen viele Wunderwerke getan?`],
+[23,`Und dann werde ich ihnen bekennen: Ich habe euch niemals gekannt; weichet von mir, ihr Übeltäter!`],
+[24,`Jeder nun, der irgend diese meine Worte hört und sie tut, den werde ich einem klugen Manne vergleichen, der sein Haus auf den Felsen baute.`],
+[25,`Und der Platzregen fiel hernieder, und die Ströme kamen, und die Winde wehten und stießen an jenes Haus, und es fiel nicht, denn es war auf den Felsen gegründet.`],
+[26,`Und jeder, der diese meine Worte hört und sie nicht tut, wird einem törichten Manne verglichen werden, der sein Haus auf den Sand baute.`],
+[27,`Und der Platzregen fiel hernieder, und die Ströme kamen, und die Winde wehten und schlugen an jenes Haus, und es fiel, und sein Fall war groß.`],
+[28,`Und es begab sich, als Jesus diese Worte vollendet hatte, da erstaunte die Volksmenge sehr über seine Lehre;`],
+[29,`denn er lehrte sie wie einer, der Gewalt hat, und nicht wie ihre Schriftgelehrten.`]
+]},
+{test:"NT", ref:"Matthäus 28", verses:[
+[1,`Spät aber am Sabbath, in der Dämmerung des ersten Wochentages, kam Maria Magdalene und die andere Maria, das Grab zu besehen.`],
+[2,`Und siehe, es geschah ein großes Erdbeben; denn ein Engel des Herrn stieg aus dem Himmel herab, trat hinzu und wälzte den Stein weg und setzte sich auf ihn.`],
+[3,`Sein Ansehen aber war wie der Blitz, und sein Kleid weiß wie Schnee.`],
+[4,`Aus Furcht aber vor ihm erbebten die Hüter und wurden wie tot.`],
+[5,`Der Engel aber antwortete und sprach zu den Weibern: Fürchtet ihr euch nicht, denn ich weiß, daß ihr Jesum, den Gekreuzigten, suchet.`],
+[6,`Er ist nicht hier, denn er ist auferstanden, wie er gesagt hat; kommet her, sehet die Stätte, wo der Herr gelegen hat,`],
+[7,`und gehet eilends hin und saget seinen Jüngern, daß er von den Toten auferstanden ist; und siehe, er geht vor euch hin nach Galiläa, daselbst werdet ihr ihn sehen. Siehe, ich habe es euch gesagt.`],
+[8,`Und sie gingen eilends von dem Grabe hinweg mit Furcht und großer Freude, und liefen, es seinen Jüngern zu verkünden.`],
+[9,`Als sie aber hingingen, es seinen Jüngern zu verkünden, siehe, da begegnete ihnen Jesus und sprach: Seid gegrüßet! Sie aber traten hinzu, umfaßten seine Füße und huldigten ihm.`],
+[10,`Da spricht Jesus zu ihnen: Fürchtet euch nicht; gehet hin, verkündet meinen Brüdern, daß sie hingehen nach Galiläa, und daselbst werden sie mich sehen.`],
+[11,`Während sie aber hingingen, siehe, da kamen etliche von der Wache in die Stadt und verkündeten den Hohenpriestern alles, was geschehen war.`],
+[12,`Und sie versammelten sich mit den Ältesten und hielten Rat und gaben den Kriegsknechten Geld genug`],
+[13,`und sprachen: Saget: Seine Jünger kamen bei Nacht und stahlen ihn, während wir schliefen.`],
+[14,`Und wenn dieses vor den Landpfleger kommt, so werden wir ihn zufriedenstellen und machen, daß ihr ohne Sorge seid.`],
+[15,`Sie aber nahmen das Geld und taten, wie sie unterrichtet worden waren. Und diese Rede ist bei den Juden ruchbar geworden bis auf den heutigen Tag.`],
+[16,`Die elf Jünger aber gingen nach Galiläa, an den Berg, wohin Jesus sie beschieden hatte.`],
+[17,`Und als sie ihn sahen, huldigten sie ihm; etliche aber zweifelten.`],
+[18,`Und Jesus trat zu ihnen und redete mit ihnen und sprach: Mir ist alle Gewalt gegeben im Himmel und auf Erden.`],
+[19,`Gehet nun hin und machet alle Nationen zu Jüngern, und taufet sie auf den Namen des Vaters und des Sohnes und des Heiligen Geistes,`],
+[20,`und lehret sie alles halten, was ich euch geboten habe. Und siehe, ich bin bei euch alle Tage bis an das Ende des Zeitalters.`]
+]},
+{test:"NT", ref:"Lukas 2", verses:[
+[1,`Es geschah aber in jenen Tagen, daß eine Verordnung vom Kaiser Augustus ausging, den ganzen Erdkreis einzuschreiben.`],
+[2,`Diese Einschreibung geschah zuerst, als Kyrenius Landpfleger von Syrien war.`],
+[3,`Und alle gingen hin, sich einschreiben zu lassen, ein jeder in seine eigene Stadt.`],
+[4,`Es ging aber auch Joseph von Galiläa aus der Stadt Nazareth hinauf nach Judäa, in die Stadt Davids, welche Bethlehem heißt, weil er aus dem Hause und Geschlechte Davids war,`],
+[5,`um sich einschreiben zu lassen mit Maria, seinem verlobten Weibe, die schwanger war.`],
+[6,`Es geschah aber, als sie daselbst waren, wurden ihre Tage erfüllt, daß sie gebären sollte;`],
+[7,`und sie gebar ihren erstgeborenen Sohn und wickelte ihn in Windeln und legte ihn in eine Krippe, weil in der Herberge kein Raum für sie war.`],
+[8,`Und es waren Hirten in jener Gegend auf dem Felde, die des Nachts Wache hielten über ihre Herde.`],
+[9,`Und siehe, ein Engel des Herrn stand bei ihnen, und die Herrlichkeit des Herrn umleuchtete sie, und sie fürchteten sich mit großer Furcht.`],
+[10,`Und der Engel sprach zu ihnen: Fürchtet euch nicht, denn siehe, ich verkündige euch große Freude, die für das ganze Volk sein wird;`],
+[11,`denn euch ist heute ein Erretter geboren, in der Stadt Davids, welcher ist Christus, der Herr.`],
+[12,`Und dies sei euch das Zeichen: Ihr werdet ein Kindlein finden, in Windeln gewickelt und in einer Krippe liegend.`],
+[13,`Und plötzlich war bei dem Engel eine Menge der himmlischen Heerscharen, die Gott lobten und sprachen:`],
+[14,`Herrlichkeit Gott in der Höhe, und Friede auf Erden, an den Menschen ein Wohlgefallen!`],
+[15,`Und es geschah, als die Engel von ihnen hinweg gen Himmel fuhren, daß die Hirten zueinander sagten: Laßt uns nun hingehen nach Bethlehem und diese Sache sehen, die geschehen ist, welche der Herr uns kundgetan hat.`],
+[16,`Und sie kamen eilends und fanden sowohl Maria als Joseph, und das Kindlein in der Krippe liegend.`],
+[17,`Als sie es aber gesehen hatten, machten sie überall das Wort kund, welches über dieses Kindlein zu ihnen geredet worden war.`],
+[18,`Und alle, die es hörten, verwunderten sich über das, was von den Hirten zu ihnen gesagt wurde.`],
+[19,`Maria aber bewahrte alle diese Worte und erwog sie in ihrem Herzen.`],
+[20,`Und die Hirten kehrten um, indem sie Gott verherrlichten und lobten über alles, was sie gehört und gesehen hatten, so wie es ihnen gesagt worden war.`]
+]},
+{test:"NT", ref:"Lukas 15", verses:[
+[11,`Er sprach aber: Ein gewisser Mensch hatte zwei Söhne.`],
+[12,`Und der jüngere von ihnen sprach zu dem Vater: Vater, gib mir den Teil des Vermögens, der mir zufällt. Und er teilte ihnen die Habe.`],
+[13,`Und nach nicht vielen Tagen brachte der jüngere Sohn alles zusammen und reiste weg in ein fernes Land, und daselbst vergeudete er sein Vermögen, indem er ausschweifend lebte.`],
+[14,`Als er aber alles verzehrt hatte, kam eine gewaltige Hungersnot über jenes Land, und er selbst fing an, Mangel zu leiden.`],
+[15,`Und er ging hin und hängte sich an einen der Bürger jenes Landes; der schickte ihn auf seine Felder, Schweine zu hüten.`],
+[16,`Und er begehrte, seinen Bauch zu füllen mit den Träbern, welche die Schweine fraßen; und niemand gab ihm.`],
+[17,`Als er aber zu sich selbst kam, sprach er: Wie viele Tagelöhner meines Vaters haben Überfluß an Brot, ich aber komme hier um vor Hunger.`],
+[18,`Ich will mich aufmachen und zu meinem Vater gehen und zu ihm sagen: Vater, ich habe gesündigt gegen den Himmel und vor dir,`],
+[19,`und bin nicht mehr würdig, dein Sohn zu heißen; mache mich wie einen deiner Tagelöhner.`],
+[20,`Und er machte sich auf und ging zu seinem Vater. Als er aber noch fern war, sah ihn sein Vater und wurde innerlich bewegt und lief und fiel ihm um seinen Hals und küßte ihn sehr.`],
+[21,`Der Sohn aber sprach zu ihm: Vater, ich habe gesündigt gegen den Himmel und vor dir, und bin nicht mehr würdig, dein Sohn zu heißen.`],
+[22,`Der Vater aber sprach zu seinen Knechten: Bringet das beste Kleid hervor und ziehet ihn an, und tut einen Ring an seine Hand und Sandalen an seine Füße;`],
+[23,`und bringet das gemästete Kalb her und schlachtet es, und lasset uns essen und fröhlich sein;`],
+[24,`denn dieser mein Sohn war tot und ist wieder lebendig geworden, war verloren und ist gefunden worden. Und sie fingen an fröhlich zu sein.`],
+[25,`Es war aber sein älterer Sohn auf dem Felde; und als er kam und sich dem Hause näherte, hörte er Musik und Reigen.`],
+[26,`Und er rief einen der Knechte herzu und erkundigte sich, was das wäre.`],
+[27,`Der aber sprach zu ihm: Dein Bruder ist gekommen, und dein Vater hat das gemästete Kalb geschlachtet, weil er ihn gesund wieder erhalten hat.`],
+[28,`Er aber wurde zornig und wollte nicht hineingehen. Sein Vater aber ging hinaus und drang in ihn.`],
+[29,`Er aber antwortete und sprach zu dem Vater: Siehe, so viele Jahre diene ich dir, und niemals habe ich ein Gebot von dir übertreten; und mir hast du niemals einen Böckchen gegeben, auf daß ich mit meinen Freunden fröhlich gewesen wäre;`],
+[30,`da aber dieser dein Sohn gekommen ist, der deine Habe mit Huren verschlungen hat, hast du ihm das gemästete Kalb geschlachtet.`],
+[31,`Er aber sprach zu ihm: Kind, du bist allezeit bei mir, und alles Meinige ist dein.`],
+[32,`Es geziemte sich aber fröhlich zu sein und sich zu freuen; denn dieser dein Bruder war tot und ist wieder lebendig geworden, und verloren und ist gefunden worden.`]
+]},
+{test:"NT", ref:"Johannes 1", verses:[
+[1,`Im Anfang war das Wort, und das Wort war bei Gott, und das Wort war Gott.`],
+[2,`Dieses war im Anfang bei Gott.`],
+[3,`Alles ward durch dasselbe, und ohne dasselbe ward auch nicht eines, das geworden ist.`],
+[4,`In ihm war Leben, und das Leben war das Licht der Menschen.`],
+[5,`Und das Licht scheint in der Finsternis, und die Finsternis hat es nicht erfaßt.`],
+[6,`Es war ein Mensch, von Gott gesandt, sein Name Johannes.`],
+[7,`Dieser kam zum Zeugnis, auf daß er zeugte von dem Lichte, damit alle durch ihn glaubten.`],
+[8,`Er war nicht das Licht, sondern er sollte zeugen von dem Lichte.`],
+[9,`Das war das wahrhaftige Licht, welches, in die Welt kommend, jeden Menschen erleuchtet.`],
+[10,`Er war in der Welt, und die Welt ward durch ihn, und die Welt kannte ihn nicht.`],
+[11,`Er kam in das Seinige, und die Seinigen nahmen ihn nicht an;`],
+[12,`so viele ihn aber aufnahmen, denen gab er das Recht, Kinder Gottes zu werden, denen, die an seinen Namen glauben;`],
+[13,`welche nicht aus Geblüt, noch aus dem Willen des Fleisches, noch aus dem Willen des Mannes, sondern aus Gott geboren sind.`],
+[14,`Und das Wort ward Fleisch und wohnte unter uns, und wir haben seine Herrlichkeit angeschaut, eine Herrlichkeit als eines Eingeborenen vom Vater, voller Gnade und Wahrheit.`]
+]},
+{test:"NT", ref:"Johannes 3", verses:[
+[1,`Es war aber ein Mensch aus den Pharisäern, sein Name Nikodemus, ein Oberster der Juden.`],
+[2,`Dieser kam zu ihm des Nachts und sprach zu ihm: Rabbi, wir wissen, daß du von Gott gekommen bist als Lehrer.`],
+[3,`Jesus antwortete und sprach zu ihm: Wahrlich, wahrlich, ich sage dir: Es sei denn, daß jemand von neuem geboren werde, so kann er das Reich Gottes nicht sehen.`],
+[4,`Nikodemus spricht zu ihm: Wie kann ein Mensch geboren werden, wenn er alt ist?`],
+[5,`Jesus antwortete: Wahrlich, wahrlich, ich sage dir: Es sei denn, daß jemand aus Wasser und Geist geboren werde, so kann er nicht in das Reich Gottes eingehen.`],
+[6,`Was aus dem Fleische geboren ist, ist Fleisch, und was aus dem Geiste geboren ist, ist Geist.`],
+[7,`Verwundere dich nicht, daß ich dir sagte: Ihr müsset von neuem geboren werden.`],
+[8,`Der Wind weht, wo er will, und du hörst sein Sausen, aber du weißt nicht, woher er kommt und wohin er geht; also ist jeder, der aus dem Geiste geboren ist.`],
+[9,`Nikodemus antwortete und sprach zu ihm: Wie kann dies geschehen?`],
+[10,`Jesus antwortete und sprach zu ihm: Du bist der Lehrer Israels und weißt dieses nicht?`],
+[11,`Wahrlich, wahrlich, ich sage dir: Wir reden, was wir wissen, und bezeugen, was wir gesehen haben, und ihr nehmet unser Zeugnis nicht an.`],
+[12,`Wenn ich euch das Irdische gesagt habe, und ihr glaubet nicht, wie werdet ihr glauben, wenn ich euch das Himmlische sage?`],
+[13,`Und niemand ist hinaufgestiegen in den Himmel, als nur der aus dem Himmel herabgestiegen ist, der Sohn des Menschen.`],
+[14,`Und gleichwie Moses in der Wüste die Schlange erhöhte, also muß der Sohn des Menschen erhöht werden,`],
+[15,`auf daß jeder, der an ihn glaubt, nicht verloren gehe, sondern ewiges Leben habe.`],
+[16,`Denn also hat Gott die Welt geliebt, daß er seinen eingeborenen Sohn gab, auf daß jeder, der an ihn glaubt, nicht verloren gehe, sondern ewiges Leben habe.`],
+[17,`Denn Gott hat seinen Sohn nicht in die Welt gesandt, auf daß er die Welt richte, sondern auf daß die Welt durch ihn errettet werde.`],
+[18,`Wer an ihn glaubt, wird nicht gerichtet; wer nicht glaubt, ist schon gerichtet, weil er nicht geglaubt hat an den Namen des eingeborenen Sohnes Gottes.`],
+[19,`Dies aber ist das Gericht, daß das Licht in die Welt gekommen ist, und die Menschen haben die Finsternis mehr geliebt als das Licht, denn ihre Werke waren böse.`],
+[20,`Denn jeder, der Arges tut, haßt das Licht und kommt nicht zu dem Licht, auf daß seine Werke nicht bloßgestellt werden.`],
+[21,`Wer aber die Wahrheit tut, kommt zu dem Licht, auf daß seine Werke offenbar werden, daß sie in Gott gewirkt sind.`],
+[22,`Nach diesem kam Jesus und seine Jünger in das Land Judäa, und daselbst verweilte er mit ihnen und taufte.`],
+[23,`Johannes aber taufte auch in Enon, nahe bei Salim, weil daselbst viel Wasser war; und sie kamen dahin und wurden getauft.`],
+[24,`Denn Johannes war noch nicht ins Gefängnis geworfen.`],
+[25,`Es entstand nun eine Streitfrage unter den Jüngern Johannes mit einem Juden über die Reinigung.`],
+[26,`Und sie kamen zu Johannes und sprachen zu ihm: Rabbi, der bei dir jenseit des Jordan war, dem du Zeugnis gegeben hast, siehe, der tauft, und alle kommen zu ihm.`],
+[27,`Johannes antwortete und sprach: Ein Mensch kann nichts empfangen, es sei ihm denn aus dem Himmel gegeben.`],
+[28,`Ihr selbst gebet mir Zeugnis, daß ich sagte: Ich bin nicht der Christus, sondern daß ich vor ihm hergesandt bin.`],
+[29,`Der die Braut hat, ist der Bräutigam; der Freund des Bräutigams aber, der dasteht und ihn hört, ist hoch erfreut über die Stimme des Bräutigams; diese meine Freude nun ist erfüllt.`],
+[30,`Er muß wachsen, ich aber abnehmen.`],
+[31,`Der von ober kommt, ist über allen; der von der Erde ist, ist von der Erde und redet von der Erde. Der vom Himmel kommt, ist über allen,`],
+[32,`und was er gesehen und gehört hat, dieses bezeugt er; und sein Zeugnis nimmt niemand an.`],
+[33,`Wer sein Zeugnis angenommen hat, hat besiegelt, daß Gott wahrhaftig ist.`],
+[34,`Denn der, welchen Gott gesandt hat, redet die Worte Gottes; denn Gott gibt den Geist nicht nach Maß.`],
+[35,`Der Vater liebt den Sohn und hat alles in seine Hand gegeben.`],
+[36,`Wer an den Sohn glaubt, hat ewiges Leben; wer aber dem Sohne nicht glaubt, wird das Leben nicht sehen, sondern der Zorn Gottes bleibt auf ihm.`]
+]},
+{test:"NT", ref:"Johannes 14", verses:[
+[1,`Euer Herz werde nicht bestürzt. Ihr glaubet an Gott, glaubet auch an mich.`],
+[2,`In dem Hause meines Vaters sind viele Wohnungen; wenn es nicht so wäre, würde ich es euch gesagt haben, denn ich gehe hin, euch eine Stätte zu bereiten.`],
+[3,`Und wenn ich hingehe und euch eine Stätte bereite, so komme ich wieder und werde euch zu mir nehmen, auf daß, wo ich bin, auch ihr seiet.`],
+[4,`Und wo ich hingehe, wisset ihr, und den Weg wisset ihr.`],
+[5,`Thomas spricht zu ihm: Herr, wir wissen nicht, wo du hingehst, und wie können wir den Weg wissen?`],
+[6,`Jesus spricht zu ihm: Ich bin der Weg und die Wahrheit und das Leben; niemand kommt zum Vater, als nur durch mich.`],
+[7,`Wenn ihr mich erkannt hättet, so würdet ihr auch meinen Vater erkannt haben; und von jetzt an erkennet ihr ihn und habt ihn gesehen.`],
+[8,`Philippus spricht zu ihm: Herr, zeige uns den Vater, und es genügt uns.`],
+[9,`Jesus spricht zu ihm: So lange Zeit bin ich bei euch, und du hast mich nicht erkannt, Philippus? Wer mich gesehen hat, hat den Vater gesehen; wie sagst du: Zeige uns den Vater?`],
+[10,`Glaubst du nicht, daß ich in dem Vater bin und der Vater in mir ist? Die Worte, die ich zu euch rede, rede ich nicht von mir selbst; der Vater aber, der in mir bleibt, er tut die Werke.`],
+[11,`Glaubet mir, daß ich in dem Vater bin und der Vater in mir ist; wenn aber nicht, so glaubet mir um der Werke selbst willen.`],
+[12,`Wahrlich, wahrlich, ich sage euch: Wer an mich glaubt, der wird die Werke auch tun, die ich tue, und wird größere als diese tun, weil ich zum Vater gehe.`],
+[13,`Und was irgend ihr bitten werdet in meinem Namen, das werde ich tun, auf daß der Vater verherrlicht werde in dem Sohne.`],
+[14,`Wenn ihr etwas bitten werdet in meinem Namen, so werde ich es tun.`]
+]},
+{test:"NT", ref:"Römer 8", verses:[
+[31,`Was sollen wir nun hierzu sagen? Wenn Gott für uns ist, wer wider uns?`],
+[32,`Er, der doch seines eigenen Sohnes nicht geschont, sondern ihn für uns alle hingegeben hat, wie wird er uns mit ihm nicht auch alles schenken?`],
+[33,`Wer wird wider Gottes Auserwählte Anklage erheben? Gott ist es, welcher rechtfertigt;`],
+[34,`wer ist, der verdamme? Christus ist es, der gestorben, ja noch mehr, der auch auferweckt, der auch zur Rechten Gottes ist, der sich auch für uns verwendet.`],
+[35,`Wer wird uns scheiden von der Liebe Christi? Trübsal oder Angst oder Verfolgung oder Hungersnot oder Blöße oder Gefahr oder Schwert?`],
+[36,`Wie geschrieben steht: „Um deinetwillen werden wir getötet den ganzen Tag; wie Schlachtschafe sind wir geachtet worden.“`],
+[37,`Aber in diesem allen sind wir mehr als Überwinder durch den, der uns geliebt hat.`],
+[38,`Denn ich bin überzeugt, daß weder Tod noch Leben, weder Engel noch Fürstentümer, weder Gegenwärtiges noch Zukünftiges, noch Gewalten,`],
+[39,`weder Höhe noch Tiefe, noch irgend ein anderes Geschöpf uns zu scheiden vermögen wird von der Liebe Gottes, die in Christo Jesu ist, unserem Herrn.`]
+]},
+{test:"NT", ref:"1. Korinther 13", verses:[
+[1,`Wenn ich mit den Sprachen der Menschen und der Engel rede, aber nicht Liebe habe, so bin ich ein tönendes Erz geworden oder eine schallende Zimbel.`],
+[2,`Und wenn ich Prophezeiung habe und alle Geheimnisse und alle Erkenntnis weiß, und wenn ich allen Glauben habe, so daß ich Berge versetze, aber nicht Liebe habe, so bin ich nichts.`],
+[3,`Und wenn ich alle meine Habe zur Speisung der Armen austeilen werde, und wenn ich meinen Leib hingebe, auf daß ich verbrannt werde, aber nicht Liebe habe, so ist es mir nichts nütze.`],
+[4,`Die Liebe ist langmütig, ist gütig; die Liebe neidet nicht; die Liebe tut nicht groß, sie bläht sich nicht auf,`],
+[5,`sie gebärdet sich nicht unanständig, sie sucht nicht das Ihrige, sie läßt sich nicht erbittern, sie rechnet Böses nicht zu,`],
+[6,`sie freut sich nicht über die Ungerechtigkeit, sondern sie freut sich mit der Wahrheit, sie erträgt alles,`],
+[7,`sie glaubt alles, sie hofft alles, sie erduldet alles.`],
+[8,`Die Liebe vergeht nimmer; seien es aber Prophezeiungen, sie werden weggetan werden; seien es Sprachen, sie werden aufhören; sei es Erkenntnis, sie wird weggetan werden.`],
+[9,`Denn wir erkennen stückweise, und wir prophezeien stückweise;`],
+[10,`wenn aber das Vollkommene gekommen sein wird, so wird das, was stückweise ist, weggetan werden.`],
+[11,`Als ich ein Kind war, redete ich wie ein Kind, dachte wie ein Kind, urteilte wie ein Kind; als ich ein Mann wurde, tat ich weg, was kindisch war.`],
+[12,`Denn wir sehen jetzt durch einen Spiegel, undeutlich, dann aber von Angesicht zu Angesicht. Jetzt erkenne ich stückweise, dann aber werde ich erkennen, gleichwie auch ich erkannt worden bin.`],
+[13,`Nun aber bleibt Glaube, Hoffnung, Liebe, diese drei; die größte aber von diesen ist die Liebe.`]
+]},
+{test:"NT", ref:"Offenbarung 21", verses:[
+[1,`Und ich sah einen neuen Himmel und eine neue Erde; denn der erste Himmel und die erste Erde waren vergangen, und das Meer ist nicht mehr.`],
+[2,`Und ich sah die heilige Stadt, das neue Jerusalem, aus dem Himmel herniederkommen von Gott, bereitet wie eine für ihren Mann geschmückte Braut.`],
+[3,`Und ich hörte eine laute Stimme aus dem Himmel sagen: Siehe, die Hütte Gottes bei den Menschen! Und er wird bei ihnen wohnen, und sie werden sein Volk sein, und Gott selbst wird bei ihnen sein, ihr Gott.`],
+[4,`Und er wird jede Träne von ihren Augen abwischen, und der Tod wird nicht mehr sein, noch Trauer, noch Geschrei, noch Schmerz wird mehr sein; denn das Erste ist vergangen.`],
+[5,`Und der auf dem Throne saß sprach: Siehe, ich mache alles neu. Und er spricht zu mir: Schreibe, denn diese Worte sind gewiß und wahrhaftig.`],
+[6,`Und er sprach zu mir: Es ist geschehen. Ich bin das Alpha und das Omega, der Anfang und das Ende. Ich will dem Dürstenden geben aus der Quelle des Wassers des Lebens umsonst.`],
+[7,`Wer überwindet, wird dieses ererben, und ich werde ihm Gott sein, und er wird mir Sohn sein.`]
+]},
+{test:"AT", ref:"1. Mose 12", verses:[
+[1,`Und Jehova sprach zu Abram: Gehe aus deinem Lande und von deiner Verwandtschaft und aus deines Vaters Hause, in das Land, das ich dir zeigen werde.`],
+[2,`Und ich will dich zu einer großen Nation machen und dich segnen, und ich will deinen Namen groß machen, und du sollst ein Segen sein.`],
+[3,`Und ich will segnen, die dich segnen, und wer dir flucht, den werde ich verfluchen; und in dir sollen gesegnet werden alle Geschlechter der Erde.`],
+[4,`Und Abram zog hin, wie Jehova zu ihm geredet hatte, und Lot zog mit ihm; Abram aber war fünfundsiebzig Jahre alt, als er aus Haran zog.`],
+[5,`Und Abram nahm Sarai, sein Weib, und Lot, seines Bruders Sohn, und alle ihre Habe, die sie erworben, und die Seelen, die sie in Haran gewonnen hatten, und sie zogen aus, um in das Land Kanaan zu gehen; und sie kamen in das Land Kanaan.`],
+[6,`Und Abram durchzog das Land bis zu dem Orte Sichem, bis zur Terebinthe Mores. Und die Kanaaniter waren damals im Lande.`],
+[7,`Und Jehova erschien dem Abram und sprach: Deinem Samen will ich dieses Land geben. Und er baute daselbst Jehova, der ihm erschienen war, einen Altar.`],
+[8,`Und er brach von dannen auf nach dem Gebirge, östlich von Bethel, und schlug sein Zelt auf, Bethel gegen Westen und Ai gegen Osten; und er baute daselbst Jehova einen Altar und rief den Namen Jehovas an.`],
+[9,`Und Abram zog fort, immer fort nach Süden.`],
+[10,`Und es entstand eine Hungersnot im Lande; und Abram zog nach Ägypten hinab, um sich daselbst aufzuhalten, denn die Hungersnot war schwer im Lande.`],
+[11,`Und es geschah, als er nahe daran war, nach Ägypten zu kommen, da sprach er zu Sarai, seinem Weibe: Siehe doch, ich weiß, daß du ein Weib, schön von Angesicht, bist;`],
+[12,`und es wird geschehen, wenn die Ägypter dich sehen, so werden sie sagen: Sie ist sein Weib; und sie werden mich erschlagen und dich am Leben lassen.`],
+[13,`Sage doch, du seiest meine Schwester, auf daß es mir wohlgehe um deinetwillen, und meine Seele am Leben bleibe deinethalben.`],
+[14,`Und es geschah, als Abram nach Ägypten kam, da sahen die Ägypter das Weib, daß sie sehr schön war.`],
+[15,`Und die Fürsten des Pharao sahen sie und priesen sie dem Pharao; und das Weib wurde in das Haus des Pharao geholt.`],
+[16,`Und er tat Abram Gutes um ihretwillen; und er bekam Schafe und Rinder und Esel und Knechte und Mägde und Eselinnen und Kamele.`],
+[17,`Und Jehova schlug den Pharao und sein Haus mit großen Plagen um Sarais willen, des Weibes Abrams.`],
+[18,`Da rief der Pharao den Abram und sprach: Was hast du mir da getan! Warum hast du mir nicht kundgetan, daß sie dein Weib ist?`],
+[19,`Warum sagtest du: Sie ist meine Schwester, so daß ich sie mir zum Weibe nahm? Und nun siehe, da ist dein Weib; nimm sie und gehe hin!`],
+[20,`Und der Pharao entbot seinetwegen Männer, die ihn geleiteten, und sein Weib und alles, was er hatte.`]
+]},
+{test:"AT", ref:"2. Mose 3", verses:[
+[1,`Und Mose weidete die Herde Jethros, seines Schwiegervaters, des Priesters von Midian; und er trieb die Herde hinter die Wüste und kam an den Berg Gottes, an den Horeb.`],
+[2,`Und der Engel Jehovas erschien ihm in einer Feuerflamme mitten aus dem Dornbusch; und er sah, und siehe, der Dornbusch brannte im Feuer, und der Dornbusch wurde nicht verzehrt.`],
+[3,`Und Mose sprach: Ich will doch hinzutreten und dieses große Gesicht sehen, warum der Dornbusch nicht verbrennt.`],
+[4,`Als aber Jehova sah, daß er hinzutrat, um zu sehen, da rief Gott ihm aus dem Dornbusch zu und sprach: Mose, Mose! Und er sprach: Hier bin ich.`],
+[5,`Und er sprach: Nahe nicht hierher; ziehe deine Schuhe aus von deinen Füßen, denn der Ort, worauf du stehst, ist heiliger Boden.`],
+[6,`Und er sprach: Ich bin der Gott deines Vaters, der Gott Abrahams, der Gott Isaaks und der Gott Jakobs. Da verhüllte Mose sein Angesicht, denn er fürchtete sich, Gott anzuschauen.`],
+[7,`Und Jehova sprach: Ich habe wohl gesehen das Elend meines Volkes, das in Ägypten ist, und sein Geschrei habe ich gehört wegen seiner Treiber, denn ich kenne seine Schmerzen;`],
+[8,`und ich bin herabgekommen, es zu erretten aus der Hand der Ägypter und es aus diesem Lande hinaufzuführen in ein gutes und geräumiges Land, in ein Land, das von Milch und Honig fließt.`],
+[9,`Und nun siehe, das Geschrei der Kinder Israel ist zu mir gekommen, und ich habe auch den Druck gesehen, womit die Ägypter sie drücken.`],
+[10,`Und nun gehe hin, und ich will dich zum Pharao senden, und führe mein Volk, die Kinder Israel, aus Ägypten heraus.`],
+[11,`Und Mose sprach zu Gott: Wer bin ich, daß ich zum Pharao gehen, und daß ich die Kinder Israel aus Ägypten herausführen sollte?`],
+[12,`Und er sprach: Weil ich mit dir sein werde; und dies sei dir das Zeichen, daß ich dich gesandt habe: Wenn du das Volk aus Ägypten herausgeführt hast, werdet ihr Gott dienen auf diesem Berge.`],
+[13,`Und Mose sprach zu Gott: Siehe, wenn ich zu den Kindern Israel komme und ihnen sage: Der Gott eurer Väter hat mich zu euch gesandt, und sie zu mir sagen: Wie ist sein Name? was soll ich ihnen sagen?`],
+[14,`Und Gott sprach zu Mose: Ich bin, der ich bin. Und er sprach: Also sollst du zu den Kindern Israel sagen: Ich bin hat mich zu euch gesandt.`],
+[15,`Und weiter sprach Gott zu Mose: Also sollst du zu den Kindern Israel sagen: Jehova, der Gott eurer Väter, der Gott Abrahams, der Gott Isaaks und der Gott Jakobs, hat mich zu euch gesandt; dies ist mein Name ewiglich, und dies mein Gedächtnis von Geschlecht zu Geschlecht.`]
+]},
+{test:"AT", ref:"Psalm 27", verses:[
+[1,`Jehova ist mein Licht und mein Heil, vor wem sollte ich mich fürchten? Jehova ist meines Lebens Stärke, vor wem sollte ich mich scheuen?`],
+[2,`Als Übeltäter mir nahten, um mein Fleisch zu fressen, meine Bedränger und meine Feinde, sie strauchelten und fielen.`],
+[3,`Wenn ein Heer sich wider mich lagert, nicht fürchtet sich mein Herz; wenn Krieg sich wider mich erhebt, hierauf vertraue ich.`],
+[4,`Eines habe ich von Jehova erbeten, dieses werde ich suchen: daß ich wohnen möge im Hause Jehovas alle Tage meines Lebens, um anzuschauen die Lieblichkeit Jehovas und nach ihm zu forschen in seinem Tempel.`],
+[5,`Denn er wird mich bergen in seiner Hütte am Tage des Übels, er wird mich verbergen im Verborgenen seines Zeltes, auf einen Felsen wird er mich erhöhen.`],
+[6,`Und nun wird mein Haupt erhöht sein über meine Feinde rings um mich her; und ich will Opfer des Jubelschalls opfern in seinem Zelte, ich will singen und Psalmen singen Jehova.`],
+[7,`Höre, Jehova, mit meiner Stimme rufe ich; und sei mir gnädig und antworte mir!`],
+[8,`Von dir hat mein Herz gesagt: Suchet mein Angesicht! Dein Angesicht, Jehova, will ich suchen.`],
+[9,`Verbirg dein Angesicht nicht vor mir, weise nicht ab im Zorne deinen Knecht! Du bist meine Hilfe gewesen; verstoße mich nicht und verlaß mich nicht, Gott meines Heils!`],
+[10,`Denn hätten mein Vater und meine Mutter mich verlassen, so würde Jehova mich aufnehmen.`],
+[11,`Lehre mich, Jehova, deinen Weg, und leite mich auf ebenem Pfade um meiner Feinde willen.`],
+[12,`Gib mich nicht preis der Gier meiner Bedränger! denn falsche Zeugen sind wider mich aufgestanden und der da Gewalttat schnaubt.`],
+[13,`Doch ich vertraue darauf, zu schauen die Güte Jehovas im Lande der Lebendigen.`],
+[14,`Harre auf Jehova! Sei stark, und dein Herz fasse Mut, ja, harre auf Jehova!`]
+]},
+{test:"AT", ref:"Psalm 46", verses:[
+[1,`Gott ist uns Zuflucht und Stärke, eine Hilfe, reichlich gefunden in Bedrängnissen.`],
+[2,`Darum werden wir uns nicht fürchten, wenngleich die Erde weiche, wenngleich Berge mitten ins Meer sich stürzen.`],
+[3,`Mögen tosen, schäumen seine Wasser, mögen beben die Berge durch sein Wüten.`],
+[4,`Ein Strom, seine Bäche erfreuen die Stadt Gottes, die heiligen Wohnungen des Höchsten.`],
+[5,`Gott ist in ihrer Mitte, sie wird nicht wanken; Gott wird ihr helfen beim Anbruch des Morgens.`],
+[6,`Es tobten die Nationen, die Königreiche wankten; er ließ seine Stimme erschallen, die Erde zerschmolz.`],
+[7,`Jehova der Heerscharen ist mit uns, eine hohe Feste ist uns der Gott Jakobs.`],
+[8,`Kommet, schauet die Taten Jehovas, der Verwüstungen angerichtet hat auf der Erde!`],
+[9,`Der die Kriege beschwichtigt bis an das Ende der Erde, den Bogen zerbricht und den Speer zerschlägt, die Wagen mit Feuer verbrennt.`],
+[10,`Lasset ab und erkennet, daß ich Gott bin! Ich werde erhaben sein unter den Nationen, erhaben auf der Erde.`],
+[11,`Jehova der Heerscharen ist mit uns, eine hohe Feste ist uns der Gott Jakobs.`]
+]},
+{test:"AT", ref:"Psalm 103", verses:[
+[1,`Preise Jehova, meine Seele, und all mein Inneres seinen heiligen Namen!`],
+[2,`Preise Jehova, meine Seele, und vergiß nicht alle seine Wohltaten!`],
+[3,`Der da vergibt alle deine Ungerechtigkeit, der da heilt alle deine Krankheiten;`],
+[4,`der dein Leben erlöst von der Grube, der dich krönt mit Güte und Erbarmungen;`],
+[5,`der mit Gutem sättigt dein Alter; deine Jugend erneuert sich wie die des Adlers.`],
+[6,`Jehova übt Gerechtigkeit und Gericht für alle, die bedrückt werden.`],
+[7,`Er tat seine Wege kund dem Mose, den Kindern Israel seine Taten.`],
+[8,`Barmherzig und gnädig ist Jehova, langsam zum Zorn und groß an Güte.`],
+[9,`Er wird nicht immerdar rechten und nicht ewiglich nachtragen.`],
+[10,`Er hat uns nicht getan nach unseren Sünden, und nach unseren Ungerechtigkeiten uns nicht vergolten.`],
+[11,`Denn so hoch die Himmel über der Erde sind, ist gewaltig seine Güte über die, so ihn fürchten.`],
+[12,`So weit der Osten ist vom Westen, hat er von uns entfernt unsere Übertretungen.`],
+[13,`Wie sich ein Vater über die Kinder erbarmt, so erbarmt sich Jehova über die, so ihn fürchten.`],
+[14,`Denn er kennt unser Gebilde, ist eingedenk, daß wir Staub sind.`],
+[15,`Der Mensch — wie Gras sind seine Tage; wie die Blume des Feldes, also blüht er.`],
+[16,`Denn ein Wind fährt darüber, und sie ist nicht mehr, und ihre Stätte kennt sie nicht mehr.`],
+[17,`Die Güte Jehovas aber ist von Ewigkeit zu Ewigkeit über die, so ihn fürchten, und seine Gerechtigkeit auf Kindeskinder hin;`],
+[18,`für die, so seinen Bund halten, und seiner Vorschriften gedenken, um sie zu tun.`],
+[19,`Jehova hat seinen Thron in den Himmeln festgestellt, und sein Reich herrscht über alles.`],
+[20,`Preiset Jehova, ihr seine Engel, ihr Gewaltigen an Kraft, Täter seines Wortes, gehorsam der Stimme seines Wortes!`],
+[21,`Preiset Jehova, alle seine Heerscharen, seine Diener, Täter seines Wohlgefallens!`],
+[22,`Preiset Jehova, alle seine Werke, an allen Orten seiner Herrschaft! Preise Jehova, meine Seele!`]
+]},
+{test:"AT", ref:"Sprüche 3", verses:[
+[1,`Mein Sohn, vergiß nicht meine Belehrung, und dein Herz bewahre meine Gebote.`],
+[2,`Denn Länge der Tage und Jahre des Lebens und Frieden werden sie dir mehren.`],
+[3,`Güte und Wahrheit mögen dich nicht verlassen; binde sie um deinen Hals, schreibe sie auf die Tafel deines Herzens;`],
+[4,`so wirst du Gunst finden und gute Einsicht in den Augen Gottes und der Menschen.`],
+[5,`Vertraue auf Jehova mit deinem ganzen Herzen, und stütze dich nicht auf deinen Verstand;`],
+[6,`erkenne ihn auf allen deinen Wegen, und er wird gerade machen deine Pfade.`],
+[7,`Sei nicht weise in deinen Augen, fürchte Jehova und weiche vom Bösen:`],
+[8,`Das wird Heilung sein für deinen Nabel und Saft für deine Gebeine.`],
+[9,`Ehre Jehova von deinem Vermögen und von den Erstlingen all deines Ertrages;`],
+[10,`so werden deine Speicher sich füllen mit Überfluß, und deine Kufen von Most überfließen.`],
+[11,`Mein Sohn, verwirf nicht die Unterweisung Jehovas, und laß dich seine Zucht nicht verdrießen;`],
+[12,`denn wen Jehova liebt, den züchtigt er, und zwar wie ein Vater den Sohn, an dem er Wohlgefallen hat.`]
+]},
+{test:"AT", ref:"Jesaja 53", verses:[
+[1,`Wer hat unserer Verkündigung geglaubt, und der Arm Jehovas, wem ist er offenbar geworden?`],
+[2,`Und er ist vor ihm aufgeschossen wie ein Schößling und wie ein Wurzelsproß aus dürrem Erdreich. Er hatte keine Gestalt und keine Pracht; und als wir ihn sahen, da hatte er kein Ansehen, daß wir seiner begehrt hätten.`],
+[3,`Verachtet war er und verlassen von den Menschen, ein Mann der Schmerzen und mit Leiden vertraut, und wie einer, vor dem man das Angesicht verbirgt; er war verachtet, und wir haben ihn für nichts geachtet.`],
+[4,`Fürwahr, unsere Leiden hat er getragen, und unsere Schmerzen hat er auf sich geladen; wir aber hielten ihn für bestraft, von Gott geschlagen und niedergebeugt.`],
+[5,`Doch um unserer Übertretungen willen war er verwundet, um unserer Missetaten willen zerschlagen; die Strafe zu unserem Frieden lag auf ihm, und durch seine Striemen ist uns Heilung geworden.`],
+[6,`Wir alle irrten umher wie Schafe, wir wandten uns ein jeder auf seinen Weg; und Jehova hat ihn treffen lassen unser aller Ungerechtigkeit.`],
+[7,`Er wurde mißhandelt, aber er beugte sich und tat seinen Mund nicht auf, wie ein Lamm, das zur Schlachtung geführt wird; und wie ein Schaf vor seinen Scherern verstummt, also tat er seinen Mund nicht auf.`],
+[8,`Er ist aus der Angst und aus dem Gericht hinweggenommen; und wer wird sein Geschlecht aussprechen? Denn er ist abgeschnitten aus dem Lande der Lebendigen: wegen der Übertretung meines Volkes hat ihn Strafe getroffen.`],
+[9,`Und man gab ihm sein Grab bei Gesetzlosen, und bei einem Reichen war er in seinem Tode; obwohl er kein Unrecht getan hat und kein Trug in seinem Munde gewesen ist.`],
+[10,`Aber Jehova gefiel es, ihn zu zerschlagen, er hat ihn leiden lassen. Wenn seine Seele sich zum Schuldopfer gestellt haben wird, so wird er einen Samen sehen, er wird seine Tage verlängern, und das Wohlgefallen Jehovas wird in seiner Hand gedeihen.`],
+[11,`Von der Mühsal seiner Seele wird er Frucht sehen und sich sättigen; durch seine Erkenntnis wird mein gerechter Knecht die Vielen zur Gerechtigkeit bringen, und ihre Missetaten wird er auf sich laden.`],
+[12,`Darum will ich ihm die Vielen zuteilen, und mit Starken wird er die Beute teilen: dafür, daß er seine Seele ausgeschüttet hat in den Tod und den Übertretern beigezählt wurde; er aber hat die Sünde vieler getragen und für die Übertreter Fürbitte getan.`]
+]},
+{test:"AT", ref:"Klagelieder 3", verses:[
+[19,`Gedenke meines Elends und meiner Bedrückung, des Wermuts und der Bitterkeit!`],
+[20,`Beständig denkt meine Seele daran und ist in mir gebeugt.`],
+[21,`Dies will ich mir zu Herzen nehmen, darum will ich hoffen:`],
+[22,`Es sind die Gütigkeiten Jehovas, daß wir nicht aufgerieben sind, denn seine Erbarmungen sind nicht zu Ende;`],
+[23,`sie sind alle Morgen neu, deine Treue ist groß.`],
+[24,`Jehova ist mein Teil, sagt meine Seele; darum will ich auf ihn hoffen.`],
+[25,`Gütig ist Jehova gegen die, so auf ihn harren, gegen die Seele, die nach ihm trachtet.`],
+[26,`Es ist gut, daß man still warte auf die Rettung Jehovas.`],
+[27,`Es ist dem Manne gut, daß er das Joch in seiner Jugend trage.`],
+[28,`Er sitze einsam und schweige, weil er es ihm auferlegt hat;`],
+[29,`er lege seinen Mund in den Staub, vielleicht gibt es Hoffnung;`],
+[30,`er biete dem, der ihn schlägt, die Wange dar, werde mit Schmach gesättigt.`],
+[31,`Denn der Herr verstößt nicht ewiglich;`],
+[32,`sondern wenn er betrübt hat, erbarmt er sich nach der Menge seiner Gütigkeiten.`],
+[33,`Denn nicht von Herzen plagt und betrübt er die Menschenkinder.`]
+]},
+{test:"NT", ref:"Lukas 1", verses:[
+[26,`Im sechsten Monat aber wurde der Engel Gabriel von Gott gesandt in eine Stadt von Galiläa, genannt Nazareth,`],
+[27,`zu einer Jungfrau, die einem Manne verlobt war, mit Namen Joseph, aus dem Hause Davids; und der Name der Jungfrau war Maria.`],
+[28,`Und der Engel kam zu ihr hinein und sprach: Sei gegrüßt, Begnadete! der Herr ist mit dir; du bist gesegnet unter den Weibern!`],
+[29,`Sie aber wurde bestürzt über das Wort und überlegte, was dies für ein Gruß sei.`],
+[30,`Und der Engel sprach zu ihr: Fürchte dich nicht, Maria, denn du hast Gnade bei Gott gefunden;`],
+[31,`und siehe, du wirst im Leibe empfangen und einen Sohn gebären, und du sollst seinen Namen Jesus heißen.`],
+[32,`Dieser wird groß sein und Sohn des Höchsten genannt werden; und der Herr, Gott, wird ihm den Thron seines Vaters David geben;`],
+[33,`und er wird über das Haus Jakob herrschen in Ewigkeit, und seines Reiches wird kein Ende sein.`],
+[34,`Maria aber sprach zu dem Engel: Wie wird dies sein, dieweil ich keinen Mann erkenne?`],
+[35,`Und der Engel antwortete und sprach zu ihr: Der Heilige Geist wird über dich kommen, und Kraft des Höchsten wird dich überschatten; darum wird auch das Heilige, das geboren werden wird, Sohn Gottes genannt werden.`],
+[36,`Und siehe, Elisabeth, deine Verwandte, auch sie hat einen Sohn empfangen in ihrem Alter, und dies ist der sechste Monat bei ihr, die unfruchtbar genannt war.`],
+[37,`Denn bei Gott wird kein Ding unmöglich sein.`],
+[38,`Maria aber sprach: Siehe, ich bin die Magd des Herrn; es geschehe mir nach deinem Worte. Und der Engel schied von ihr.`]
+]},
+{test:"NT", ref:"Lukas 10", verses:[
+[25,`Und siehe, ein gewisser Gesetzgelehrter stand auf, versuchte ihn und sprach: Lehrer, was muß ich getan haben, um ewiges Leben zu ererben?`],
+[26,`Er aber sprach zu ihm: Was steht in dem Gesetz geschrieben? wie liesest du?`],
+[27,`Er aber antwortete und sprach: Du sollst den Herrn, deinen Gott, lieben aus deinem ganzen Herzen und aus deiner ganzen Seele und aus deiner ganzen Kraft und aus deinem ganzen Verstande, und deinen Nächsten wie dich selbst.`],
+[28,`Er sprach aber zu ihm: Du hast recht geantwortet; tue dies, und du wirst leben.`],
+[29,`Er aber wollte sich selbst rechtfertigen und sprach zu Jesu: Und wer ist mein Nächster?`],
+[30,`Jesus aber erwiderte und sprach: Ein gewisser Mensch ging von Jerusalem nach Jericho hinab und fiel unter Räuber, die ihn auch auszogen und ihm Schläge versetzten und weggingen und ihn halbtot liegen ließen.`],
+[31,`Von ungefähr aber ging ein gewisser Priester jenes Weges hinab; und als er ihn sah, ging er an der entgegengesetzten Seite vorüber.`],
+[32,`Gleicherweise aber kam auch ein Levit, der an den Ort gelangte, und als er ihn sah, ging er an der entgegengesetzten Seite vorüber.`],
+[33,`Ein gewisser Samariter aber, der auf der Reise war, kam zu ihm hin, und als er ihn sah, wurde er innerlich bewegt,`],
+[34,`und trat hinzu und verband seine Wunden und goß Öl und Wein darauf; und er setzte ihn auf sein eigenes Tier und führte ihn in eine Herberge und trug Sorge für ihn.`],
+[35,`Und am folgenden Morgen zog er zwei Denare heraus und gab sie dem Wirt und sprach: Trage Sorge für ihn, und was irgend du noch dazu verwenden wirst, werde ich dir bezahlen, wenn ich zurückkomme.`],
+[36,`Wer von diesen dreien dünkt dich der Nächste gewesen zu sein von dem, der unter die Räuber gefallen war?`],
+[37,`Er aber sprach: Der die Barmherzigkeit an ihm tat. Da sprach Jesus zu ihm: Gehe hin und tue du desgleichen.`]
+]},
+{test:"NT", ref:"Apostelgeschichte 2", verses:[
+[1,`Und als der Tag der Pfingsten sich erfüllte, waren sie alle an einem Orte beisammen.`],
+[2,`Und plötzlich geschah aus dem Himmel ein Brausen, wie von einem daherfahrenden gewaltigen Winde, und erfüllte das ganze Haus, wo sie saßen.`],
+[3,`Und es erschienen ihnen zerteilte Zungen wie von Feuer, und sie setzten sich auf jeden einzelnen von ihnen.`],
+[4,`Und sie wurden alle mit Heiligem Geiste erfüllt und fingen an, in anderen Sprachen zu reden, wie der Geist ihnen gab auszusprechen.`],
+[5,`Es wohnten aber in Jerusalem Juden, gottesfürchtige Männer, von jeder Nation derer, die unter dem Himmel sind.`],
+[6,`Als sich aber dieses Getön erhob, kam die Menge zusammen und wurde bestürzt, denn es hörte sie ein jeder in seiner eigenen Mundart reden.`],
+[7,`Sie entsetzten sich aber alle und verwunderten sich und sprachen: Siehe, sind nicht alle diese, die da reden, Galiläer?`],
+[8,`Und wie hören wir sie, ein jeder in unserer eigenen Mundart, in der wir geboren sind?`],
+[9,`Parther und Meder und Elamiter, und die Bewohner von Mesopotamien und von Judäa und Kappadocien, Pontus und Asien,`],
+[10,`und Phrygien und Pamphylien, Ägypten und den Gegenden von Libyen gegen Kyrene hin, und die hier weilenden Römer, sowohl Juden als Proselyten,`],
+[11,`Kreter und Araber — wie hören wir sie in unseren Sprachen die großen Taten Gottes reden?`],
+[12,`Sie entsetzten sich aber alle und waren in Verlegenheit und sagten einer zum anderen: Was mag dies wohl sein?`],
+[13,`Andere aber sagten spottend: Sie sind voll süßen Weines.`]
+]},
+{test:"NT", ref:"Römer 12", verses:[
+[1,`Ich ermahne euch nun, Brüder, durch die Erbarmungen Gottes, eure Leiber darzustellen als ein lebendiges, heiliges, Gott wohlgefälliges Schlachtopfer, welches euer vernünftiger Dienst ist.`],
+[2,`Und seid nicht gleichförmig dieser Welt, sondern werdet verwandelt durch die Erneuerung des Sinnes, daß ihr prüfen möget, was der gute und wohlgefällige und vollkommene Wille Gottes ist.`],
+[3,`Denn ich sage durch die Gnade, die mir gegeben worden, jedem, der unter euch ist, nicht höher von sich zu denken, als sich zu denken sich gebührt, sondern so zu denken, daß er besonnen sei, wie Gott einem jeden das Maß des Glaubens zugeteilt hat.`],
+[4,`Denn gleichwie wir in einem Leibe viele Glieder haben, aber die Glieder nicht alle dieselbe Verrichtung haben,`],
+[5,`also sind wir, die Vielen, ein Leib in Christo, einzeln aber Glieder voneinander.`],
+[6,`Da wir aber verschiedene Gnadengaben haben, nach der uns verliehenen Gnade, so laßt uns sie so gebrauchen: sei es Weissagung, nach dem Maße des Glaubens;`],
+[7,`sei es Dienst, in dem Dienst; sei es der da lehrt, in der Lehre;`],
+[8,`sei es, der da ermahnt, in der Ermahnung; der da mitteilt, in Einfalt; der da vorsteht, mit Fleiß; der Barmherzigkeit übt, mit Freudigkeit.`],
+[9,`Die Liebe sei ungeheuchelt. Verabscheuet das Böse, haltet fest am Guten.`],
+[10,`In der Bruderliebe seid herzlich zueinander, in Ehrerbietung einer dem anderen vorangehend.`],
+[11,`Im Fleiß nicht säumig, inbrünstig im Geist, dem Herrn dienend.`],
+[12,`In Hoffnung freuet euch, in Trübsal harret aus, im Gebet haltet an.`],
+[13,`Nehmet teil an den Bedürfnissen der Heiligen, gehet der Gastfreundschaft nach.`]
+]},
+{test:"NT", ref:"Galater 5", verses:[
+[16,`Ich sage aber: Wandelt im Geiste, und ihr werdet die Lust des Fleisches nicht vollbringen.`],
+[17,`Denn das Fleisch gelüstet wider den Geist, der Geist aber wider das Fleisch; diese aber sind einander entgegengesetzt, auf daß ihr nicht tuet, was irgend ihr wollt.`],
+[18,`Wenn ihr aber durch den Geist geleitet werdet, so seid ihr nicht unter Gesetz.`],
+[19,`Offenbar aber sind die Werke des Fleisches, welche sind: Hurerei, Unreinigkeit, Ausschweifung,`],
+[20,`Götzendienst, Zauberei, Feindschaft, Hader, Eifersucht, Zorn, Zänkereien, Zwiespalt, Sekten,`],
+[21,`Neid, Trunkenheit, Gelage und dergleichen, wovon ich euch vorhersage, gleichwie ich auch vorhergesagt habe, daß, die solches tun, das Reich Gottes nicht ererben werden.`],
+[22,`Die Frucht des Geistes aber ist: Liebe, Freude, Friede, Langmut, Freundlichkeit, Gütigkeit, Treue, Sanftmut, Enthaltsamkeit;`],
+[23,`wider solche gibt es kein Gesetz.`],
+[24,`Die aber des Christus sind, haben das Fleisch gekreuzigt samt den Leidenschaften und Lüsten.`],
+[25,`Wenn wir durch den Geist leben, so laßt uns auch durch den Geist wandeln.`],
+[26,`Laßt uns nicht eitler Ehre begierig sein, einander herausfordernd, einander beneidend.`]
+]},
+{test:"NT", ref:"Philipper 4", verses:[
+[4,`Freuet euch in dem Herrn allezeit! wiederum will ich sagen: Freuet euch!`],
+[5,`Laßt eure Gelindigkeit alle Menschen wissen; der Herr ist nahe.`],
+[6,`Seid um nichts besorgt, sondern in allem lasset durch Gebet und Flehen mit Danksagung eure Anliegen vor Gott kundwerden;`],
+[7,`und der Friede Gottes, der allen Verstand übersteigt, wird eure Herzen und euren Sinn bewahren in Christo Jesu.`],
+[8,`Übrigens, Brüder, alles was wahr, alles was würdig, alles was gerecht, alles was rein, alles was lieblich, alles was wohllautend ist, wenn es irgend eine Tugend und wenn es irgend ein Lob gibt, dieses erwäget.`],
+[9,`Was ihr auch gelernt und empfangen und gehört und an mir gesehen habt, dieses tut, und der Gott des Friedens wird mit euch sein.`],
+[10,`Ich habe mich aber im Herrn hoch gefreut, daß ihr endlich wieder aufgelebt seid, meiner zu gedenken; wiewohl ihr auch daran dachtet, aber ihr hattet keine Gelegenheit.`],
+[11,`Nicht daß ich dies des Mangels halber sage, denn ich habe gelernt, worin ich bin, mich zu begnügen.`],
+[12,`Ich weiß sowohl erniedrigt zu sein, als ich weiß, Überfluß zu haben; in jedem und in allem bin ich unterwiesen, sowohl satt zu sein als zu hungern, sowohl Überfluß zu haben als Mangel zu leiden.`],
+[13,`Ich vermag alles in dem, der mich kräftigt.`]
+]},
+{test:"NT", ref:"Jakobus 1", verses:[
+[19,`Ihr wisset es, meine geliebten Brüder. Jeder Mensch aber sei schnell zum Hören, langsam zum Reden, langsam zum Zorn.`],
+[20,`Denn eines Mannes Zorn wirkt nicht Gottes Gerechtigkeit.`],
+[21,`Deshalb leget ab alle Unsauberkeit und alles Übermaß von Schlechtigkeit, und empfanget mit Sanftmut das eingepflanzte Wort, das eure Seelen zu erretten vermag.`],
+[22,`Seid aber Täter des Wortes und nicht allein Hörer, die sich selbst betrügen.`],
+[23,`Denn wenn jemand ein Hörer des Wortes ist und nicht ein Täter, der ist einem Manne gleich, welcher sein natürliches Angesicht in einem Spiegel betrachtet;`],
+[24,`denn er hat sich selbst betrachtet und ist weggegangen, und er hat alsbald vergessen, wie er beschaffen war.`],
+[25,`Wer aber in das vollkommene Gesetz, das der Freiheit, nahe hineinschaut und darin bleibt, indem er nicht ein vergeßlicher Hörer, sondern ein Täter des Werkes ist, dieser wird glückselig sein in seinem Tun.`],
+[26,`Wenn jemand sich dünkt, er diene Gott, und zügelt nicht seine Zunge, sondern betrügt sein Herz, dessen Gottesdienst ist eitel.`],
+[27,`Ein reiner und unbefleckter Gottesdienst vor Gott und dem Vater ist dieser: Waisen und Witwen in ihrer Drangsal besuchen, sich selbst von der Welt unbefleckt erhalten.`]
+]},
+{test:"NT", ref:"1. Johannes 4", verses:[
+[7,`Geliebte, laßt uns einander lieben, denn die Liebe ist aus Gott, und jeder, der liebt, ist aus Gott geboren und erkennt Gott.`],
+[8,`Wer nicht liebt, hat Gott nicht erkannt, denn Gott ist Liebe.`],
+[9,`Hierin ist die Liebe Gottes zu uns geoffenbart worden, daß Gott seinen eingeborenen Sohn in die Welt gesandt hat, auf daß wir durch ihn leben möchten.`],
+[10,`Hierin ist die Liebe: nicht daß wir Gott geliebt haben, sondern daß er uns geliebt und seinen Sohn gesandt hat als eine Sühnung für unsere Sünden.`],
+[11,`Geliebte, wenn Gott uns also geliebt hat, so sind auch wir schuldig, einander zu lieben.`],
+[12,`Niemand hat Gott jemals gesehen; wenn wir einander lieben, so bleibt Gott in uns, und seine Liebe ist in uns vollendet.`],
+[13,`Hieran erkennen wir, daß wir in ihm bleiben und er in uns, daß er uns von seinem Geiste gegeben hat.`],
+[14,`Und wir haben gesehen und bezeugen, daß der Vater den Sohn gesandt hat als Heiland der Welt.`],
+[15,`Wer irgend bekennt, daß Jesus der Sohn Gottes ist, Gott bleibt in ihm und er in Gott.`],
+[16,`Und wir haben erkannt und geglaubt die Liebe, die Gott zu uns hat. Gott ist Liebe, und wer in der Liebe bleibt, bleibt in Gott und Gott in ihm.`],
+[17,`Hierin ist die Liebe bei uns vollendet, auf daß wir Freimütigkeit haben an dem Tage des Gerichts, daß, gleichwie er ist, auch wir sind in dieser Welt.`],
+[18,`Furcht ist nicht in der Liebe, sondern die vollkommene Liebe treibt die Furcht aus, denn die Furcht hat es mit Strafe zu tun; wer sich aber fürchtet, ist nicht vollendet in der Liebe.`],
+[19,`Wir lieben, weil er uns zuerst geliebt hat.`],
+[20,`Wenn jemand sagt: Ich liebe Gott, und haßt seinen Bruder, so ist er ein Lügner; denn wer seinen Bruder nicht liebt, den er gesehen hat, wie kann er Gott lieben, den er nicht gesehen hat?`],
+[21,`Und dieses Gebot haben wir von ihm, daß, wer Gott liebt, auch seinen Bruder liebe.`]
+]}
+];
+
+/* =========================================================================
+   Abschnitte in ca. 2-Minuten-Häppchen zerlegen
+   ========================================================================= */
+const WORDS_PER_CHUNK = 260;
+
+function chunkChapter(ch){
+  const chunks = [];
+  let cur = [];
+  let count = 0;
+  for(const v of ch.verses){
+    const w = v[1].split(/\s+/).length;
+    if(count + w > WORDS_PER_CHUNK && cur.length){
+      chunks.push(build(cur));
+      cur = []; count = 0;
+    }
+    cur.push(v);
+    count += w;
+  }
+  if(cur.length) chunks.push(build(cur));
+  function build(arr){
+    const start = arr[0][0], end = arr[arr.length-1][0];
+    const range = start === end ? `${start}` : `${start}–${end}`;
+    return {
+      test: ch.test,
+      chapterRef: ch.ref,
+      ref: `${ch.ref},${range}`,
+      verses: arr,
+      words: arr.reduce((s,v)=>s+v[1].split(/\s+/).length,0)
+    };
+  }
+  return chunks;
+}
+
+const READINGS = CHAPTERS.flatMap(chunkChapter);
+READINGS.forEach((r,i)=> r.id = i);
+
+/* Kurze Zitate für "Vers des Tages" / Zufallsvers - Referenzen ins bestehende Material,
+   damit der Text nur an einer Stelle gepflegt werden muss. */
+function findVerse(chapterRef, num){
+  const ch = CHAPTERS.find(c => c.ref === chapterRef);
+  if(!ch) return null;
+  const v = ch.verses.find(v => v[0] === num);
+  if(!v) return null;
+  return { chapterRef, num: v[0], text: v[1], test: ch.test };
+}
+const VOTD_POOL = [
+  ["Psalm 23", 1], ["Psalm 23", 4], ["Psalm 121", 2], ["Psalm 100", 5],
+  ["Jesaja 40", 8], ["Johannes 3", 16], ["Johannes 14", 6], ["Matthäus 5", 8],
+  ["Matthäus 6", 34], ["1. Korinther 13", 13], ["Römer 8", 38], ["Römer 8", 39],
+  ["Psalm 1", 1], ["Psalm 91", 1], ["Psalm 139", 14], ["Offenbarung 21", 4],
+  ["Matthäus 7", 7], ["Lukas 15", 20], ["Psalm 8", 4], ["Jona 2", 10],
+  ["Psalm 27", 1], ["Psalm 46", 1], ["Psalm 103", 8], ["Psalm 103", 12],
+  ["Sprüche 3", 5], ["Jesaja 53", 5], ["Klagelieder 3", 22], ["Klagelieder 3", 23],
+  ["Römer 12", 2], ["Galater 5", 22], ["Philipper 4", 6], ["Philipper 4", 13],
+  ["1. Johannes 4", 18], ["1. Johannes 4", 19], ["Jakobus 1", 22], ["Lukas 1", 37]
+];
+function dayOfYear(d){
+  const start = new Date(d.getFullYear(),0,0);
+  return Math.floor((d - start) / 86400000);
+}
+function getVerseOfDay(){
+  const idx = dayOfYear(new Date()) % VOTD_POOL.length;
+  const [ref, num] = VOTD_POOL[idx];
+  return findVerse(ref, num);
+}
+function getRandomVerse(){
+  const ch = CHAPTERS[Math.floor(Math.random()*CHAPTERS.length)];
+  const v = ch.verses[Math.floor(Math.random()*ch.verses.length)];
+  return { chapterRef: ch.ref, num: v[0], text: v[1], test: ch.test };
+}
+
+/* =========================================================================
+   Zustand & Speicherung
+   ========================================================================= */
+const STORAGE_KEY = "zweiminutenbibel_v2";
+const STORAGE_KEY_OLD = "zweiminutenbibel_v1";
+
+function todayStr(d = new Date()){
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function addDays(dateStr, n){
+  const d = new Date(dateStr + "T00:00:00");
+  d.setDate(d.getDate()+n);
+  return todayStr(d);
+}
+function defaultState(){
+  return {
+    streak:0, totalDays:0, lastDate:null,
+    filter:"ALL", readMode:"sequential",
+    cursors:{ALL:0,AT:0,NT:0},
+    todayReadingRef: null,
+    readLog:{},
+    history:[],
+    favorites:{},
+    highlights:{},
+    notes:{},
+    readChunks:{},
+    theme:"dark", fontSize:"md", fontStyle:"serif", autoNight:false
+  };
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      return Object.assign(defaultState(), parsed);
+    }
+    const old = localStorage.getItem(STORAGE_KEY_OLD);
+    if(old){
+      const o = JSON.parse(old);
+      const s = defaultState();
+      s.streak = o.streak || 0;
+      s.totalDays = o.totalDays || 0;
+      s.lastDate = o.lastDate || null;
+      s.filter = o.filter || "ALL";
+      return s;
+    }
+  }catch(e){}
+  return defaultState();
+}
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+
+let state = loadState();
+let highlightMode = false;
+
+/* =========================================================================
+   Hilfsfunktionen
+   ========================================================================= */
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function verseKey(chapterRef, num){ return chapterRef + "::" + num; }
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast._tm);
+  showToast._tm = setTimeout(()=> t.classList.remove("show"), 2200);
+}
+function pool(){
+  return state.filter === "ALL" ? READINGS : READINGS.filter(r => r.test === state.filter);
+}
+function poolForChapter(chapterRef){
+  return READINGS.filter(r => r.chapterRef === chapterRef);
+}
+function findChunkContainingVerse(chapterRef, num){
+  return READINGS.find(r => r.chapterRef === chapterRef && r.verses.some(v => v[0] === num));
+}
+function markReadAndHistory(r){
+  state.readChunks[r.id] = true;
+  const last = state.history[0];
+  if(!last || last.id !== r.id){
+    state.history.unshift({ id:r.id, ts: Date.now() });
+    if(state.history.length > 60) state.history.length = 60;
+  } else {
+    last.ts = Date.now();
+  }
+  saveState();
+}
+
+/* =========================================================================
+   Passage-Komponente (wiederverwendbar für "Heute" und Overlay)
+   ========================================================================= */
+function makePassageComponent(rootEl){
+  let curPool = [];
+  let idx = 0;
+
+  function current(){ return curPool[idx]; }
+
+  function verseHtml(r){
+    return r.verses.map(v => {
+      const num = v[0], text = v[1];
+      const key = verseKey(r.chapterRef, num);
+      const isFav = !!state.favorites[key];
+      const hl = state.highlights[key];
+      const hlClass = hl ? ("hl-" + hl) : "";
+      return `<span class="v ${hlClass}" data-key="${key}"><sup class="vnum ${isFav?'fav':''}" data-num="${num}">${num}</sup>${escapeHtml(text)}</span>`;
+    }).join(" ");
+  }
+
+  function render(){
+    const r = current();
+    if(!r){ rootEl.classList.remove("show"); rootEl.innerHTML=""; return; }
+    const noteVal = state.notes[r.id] || "";
+    rootEl.innerHTML = `
+      <span class="badge ${r.test}">${r.test === "AT" ? "Altes Testament" : "Neues Testament"}</span>
+      <h2>${escapeHtml(r.ref)}</h2>
+      <div class="verse-text" id="vt-${rootEl.id}">${verseHtml(r)}</div>
+      <div class="meta"><span>${r.words} Wörter</span><span>ca. 2 Min.</span></div>
+      <div class="toolbar">
+        <button data-act="fav-mode" class="${highlightMode?'':''}" title="Verse antippen markiert/entmarkiert Favorit">★ Favorit</button>
+        <button data-act="hl-mode" class="${highlightMode?'on':''}" title="Verse antippen zum Farbmarkieren">🖍 Markieren</button>
+        <button data-act="speak">🔊 Vorlesen</button>
+        <button data-act="copy">⧉ Kopieren</button>
+        <button data-act="share">↗ Teilen</button>
+      </div>
+      <div class="note-box">
+        <label>Notiz zu diesem Abschnitt</label>
+        <textarea data-act="note" placeholder="Eigene Gedanken, Gebetsanliegen …">${escapeHtml(noteVal)}</textarea>
+      </div>
+      <div class="nav-row">
+        <button data-act="prev" style="visibility:${idx>0?'visible':'hidden'}">‹ Zurück</button>
+        <button data-act="next" class="next">Nächster Abschnitt ›</button>
+      </div>
+    `;
+    rootEl.classList.add("show");
+    wire();
+    refreshAllStats();
+  }
+
+  function wire(){
+    rootEl.onclick = (e) => {
+      const actEl = e.target.closest("[data-act]");
+      if(actEl){
+        const act = actEl.dataset.act;
+        if(act === "prev") return goPrev();
+        if(act === "next") return goNext();
+        if(act === "hl-mode"){ highlightMode = !highlightMode; render(); return; }
+        if(act === "speak") return speakCurrent(actEl);
+        if(act === "copy") return copyCurrent();
+        if(act === "share") return shareCurrent();
+        return;
+      }
+      const numEl = e.target.closest(".vnum");
+      if(numEl){
+        const num = parseInt(numEl.dataset.num,10);
+        const r = current();
+        const key = verseKey(r.chapterRef, num);
+        if(highlightMode){
+          const order = [undefined,"yellow","green","blue"];
+          const cur = state.highlights[key];
+          const nextIdx = (order.indexOf(cur)+1) % order.length;
+          const next = order[nextIdx];
+          if(next){ state.highlights[key] = next; } else { delete state.highlights[key]; }
+        } else {
+          if(state.favorites[key]){ delete state.favorites[key]; }
+          else { state.favorites[key] = true; }
+        }
+        saveState();
+        render();
+      }
+    };
+    const ta = rootEl.querySelector('[data-act="note"]');
+    if(ta){
+      ta.addEventListener("input", () => {
+        clearTimeout(ta._tm);
+        ta._tm = setTimeout(() => {
+          const r = current();
+          if(ta.value.trim()) state.notes[r.id] = ta.value;
+          else delete state.notes[r.id];
+          saveState();
+          refreshAllStats();
+        }, 400);
+      });
+    }
+  }
+
+  function speakCurrent(btn){
+    if(!("speechSynthesis" in window)){ showToast("Vorlesen wird von diesem Browser nicht unterstützt."); return; }
+    if(speechSynthesis.speaking){ speechSynthesis.cancel(); btn.classList.remove("speaking"); btn.textContent="🔊 Vorlesen"; return; }
+    const r = current();
+    const text = r.verses.map(v=>v[1]).join(" ");
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "de-DE";
+    u.onend = () => { btn.classList.remove("speaking"); btn.textContent="🔊 Vorlesen"; };
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+    btn.classList.add("speaking");
+    btn.textContent = "⏹ Stop";
+  }
+  function currentPlainText(){
+    const r = current();
+    return `${r.ref} (Elberfelder 1905)\n\n` + r.verses.map(v=>`${v[0]} ${v[1]}`).join(" ");
+  }
+  function copyCurrent(){
+    const text = currentPlainText();
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(text).then(()=>showToast("In die Zwischenablage kopiert.")).catch(()=>showToast("Kopieren fehlgeschlagen."));
+    } else { showToast("Kopieren wird hier nicht unterstützt."); }
+  }
+  function shareCurrent(){
+    const text = currentPlainText();
+    if(navigator.share){
+      navigator.share({ text }).catch(()=>{});
+    } else {
+      copyCurrent();
+    }
+  }
+
+  function show(reading, p){
+    curPool = p;
+    idx = p.findIndex(x => x.id === reading.id);
+    if(idx < 0) idx = 0;
+    markReadAndHistory(reading);
+    render();
+  }
+  function goNext(){
+    if(!curPool.length) return;
+    idx = (idx+1) % curPool.length;
+    markReadAndHistory(curPool[idx]);
+    render();
+  }
+  function goPrev(){
+    if(!curPool.length || idx===0) return;
+    idx -= 1;
+    markReadAndHistory(curPool[idx]);
+    render();
+  }
+  function isVisible(){ return rootEl.classList.contains("show"); }
+
+  return { show, goNext, goPrev, isVisible, current };
+}
+
+const heutePassage = makePassageComponent(document.getElementById("passageHeute"));
+const overlayPassage = makePassageComponent(document.getElementById("passageOverlayContent"));
+
+/* Overlay öffnen/schließen */
+const overlayEl = document.getElementById("passageOverlay");
+function openOverlay(reading, chapterPool){
+  overlayEl.classList.add("show");
+  overlayPassage.show(reading, chapterPool || poolForChapter(reading.chapterRef));
+}
+document.getElementById("overlayClose").addEventListener("click", () => {
+  overlayEl.classList.remove("show");
+  if(speechSynthesis.speaking) speechSynthesis.cancel();
+});
+overlayEl.addEventListener("click", (e) => { if(e.target === overlayEl){ overlayEl.classList.remove("show"); if(speechSynthesis.speaking) speechSynthesis.cancel(); } });
+
+/* Tastatursteuerung */
+document.addEventListener("keydown", (e) => {
+  if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  const useOverlay = overlayEl.classList.contains("show");
+  const comp = useOverlay ? overlayPassage : heutePassage;
+  if(!comp.isVisible()) return;
+  if(e.key === "ArrowRight") comp.goNext();
+  if(e.key === "ArrowLeft") comp.goPrev();
+});
+
+/* =========================================================================
+   TAB: HEUTE
+   ========================================================================= */
+const streakNum = document.getElementById("streakNum");
+const totalNum = document.getElementById("totalNum");
+const goBtn = document.getElementById("goBtn");
+const testToggleBtns = document.querySelectorAll("#testToggle button");
+const modeToggleBtns = document.querySelectorAll("#modeToggle button");
+
+function renderStats(){
+  streakNum.textContent = state.streak;
+  totalNum.textContent = state.totalDays;
+}
+function renderCalendarStrip(){
+  const el = document.getElementById("calStrip");
+  el.innerHTML = "";
+  const today = new Date();
+  for(let i=13;i>=0;i--){
+    const d = new Date(today); d.setDate(d.getDate()-i);
+    const ds = todayStr(d);
+    const dot = document.createElement("div");
+    dot.className = "cal-dot" + (state.readLog[ds] ? " hit" : "") + (ds===todayStr()?" today":"");
+    dot.title = ds;
+    el.appendChild(dot);
+  }
+}
+function renderToggle(){
+  testToggleBtns.forEach(b => b.classList.toggle("active", b.dataset.filter === state.filter));
+  modeToggleBtns.forEach(b => b.classList.toggle("active", b.dataset.mode === state.readMode));
+}
+function renderVerseOfDay(){
+  const v = getVerseOfDay();
+  document.getElementById("votdText").textContent = "„" + v.text + "“";
+  document.getElementById("votdRef").textContent = v.chapterRef + "," + v.num + " · " + (v.test==="AT"?"Altes Testament":"Neues Testament");
+}
+document.getElementById("votdOpenBtn").addEventListener("click", () => {
+  const v = getVerseOfDay();
+  const chunk = findChunkContainingVerse(v.chapterRef, v.num);
+  if(chunk) openOverlay(chunk);
+});
+
+function updateGoButtonLabel(){
+  goBtn.textContent = state.lastDate === todayStr() ? "Heute schon gelesen — nochmal ansehen" : "Heute lesen";
+  goBtn.classList.toggle("done", state.lastDate === todayStr());
+}
+
+function readToday(){
+  const today = todayStr();
+  if(state.lastDate === today && state.todayReadingRef){
+    const r = READINGS.find(x => x.ref === state.todayReadingRef);
+    if(r){ heutePassage.show(r, pool()); return; }
+  }
+  if(state.lastDate === addDays(today, -1)){ state.streak += 1; } else { state.streak = 1; }
+  state.totalDays += 1;
+  state.lastDate = today;
+  state.readLog[today] = true;
+
+  const p = pool();
+  let idx;
+  if(state.readMode === "random"){
+    idx = Math.floor(Math.random() * p.length);
+  } else {
+    idx = (state.cursors[state.filter] || 0) % p.length;
+    state.cursors[state.filter] = idx + 1;
+  }
+  const reading = p[idx];
+  state.todayReadingRef = reading.ref;
+
+  saveState();
+  renderStats();
+  renderCalendarStrip();
+  updateGoButtonLabel();
+  heutePassage.show(reading, p);
+  renderLibrary();
+}
+
+testToggleBtns.forEach(b => {
+  b.addEventListener("click", () => { state.filter = b.dataset.filter; saveState(); renderToggle(); });
+});
+modeToggleBtns.forEach(b => {
+  b.addEventListener("click", () => { state.readMode = b.dataset.mode; saveState(); renderToggle(); });
+});
+goBtn.addEventListener("click", readToday);
+
+/* =========================================================================
+   TAB: BIBLIOTHEK
+   ========================================================================= */
+const searchInput = document.getElementById("searchInput");
+const searchResultsEl = document.getElementById("searchResults");
+const libraryDefaultEl = document.getElementById("libraryDefault");
+
+function renderBookTree(){
+  const el = document.getElementById("bookTree");
+  const groups = {}; // bookName -> {test, chapters: {chapterRef: [chunks]}}
+  READINGS.forEach(r => {
+    const m = r.chapterRef.match(/^(.*)\s(\d+)$/);
+    const bookName = m ? m[1] : r.chapterRef;
+    const chapNum = m ? m[2] : "";
+    if(!groups[bookName]) groups[bookName] = { test: r.test, chapters: {} , order: Object.keys(groups).length};
+    if(!groups[bookName].chapters[r.chapterRef]) groups[bookName].chapters[r.chapterRef] = { num: chapNum, chunks: [] };
+    groups[bookName].chapters[r.chapterRef].chunks.push(r);
+  });
+  let html = "";
+  ["AT","NT"].forEach(test => {
+    const names = Object.keys(groups).filter(n => groups[n].test === test);
+    if(!names.length) return;
+    html += `<div class="book-group"><h3><span class="tdot ${test}"></span>${test === "AT" ? "Altes Testament" : "Neues Testament"}</h3><div class="chip-row">`;
+    names.forEach(name => {
+      Object.keys(groups[name].chapters).forEach(chapterRef => {
+        const chapInfo = groups[name].chapters[chapterRef];
+        const allRead = chapInfo.chunks.every(c => state.readChunks[c.id]);
+        const someRead = chapInfo.chunks.some(c => state.readChunks[c.id]);
+        html += `<div class="chip" data-chapterref="${escapeHtml(chapterRef)}">
+          <span>${escapeHtml(chapterRef)}</span>
+          ${chapInfo.chunks.length>1 ? `<span class="parts">(${chapInfo.chunks.length} Teile)</span>`:""}
+          ${allRead ? `<span class="rd">✓</span>` : someRead ? `<span class="rd">◐</span>` : ""}
+        </div>`;
+      });
+    });
+    html += `</div></div>`;
+  });
+  el.innerHTML = html;
+  el.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const chapterRef = chip.dataset.chapterref;
+      const p = poolForChapter(chapterRef);
+      if(p.length) openOverlay(p[0], p);
+    });
+  });
+}
+function renderLibraryProgress(){
+  const total = READINGS.length;
+  const read = Object.keys(state.readChunks).length;
+  document.getElementById("libProgressBar").style.width = (total? (read/total*100) : 0) + "%";
+  document.getElementById("libProgressLabel").textContent = `${read} von ${total} Abschnitten gelesen`;
+}
+function renderLibrary(){
+  renderBookTree();
+  renderLibraryProgress();
+}
+function runSearch(q){
+  q = q.trim().toLowerCase();
+  if(!q){ searchResultsEl.innerHTML=""; libraryDefaultEl.style.display="block"; return; }
+  libraryDefaultEl.style.display = "none";
+  const matches = [];
+  for(const r of READINGS){
+    for(const v of r.verses){
+      if(v[1].toLowerCase().includes(q)){
+        matches.push({ r, num: v[0], text: v[1] });
+        if(matches.length >= 60) break;
+      }
+    }
+    if(matches.length >= 60) break;
+  }
+  if(!matches.length){ searchResultsEl.innerHTML = `<div class="empty-hint">Keine Treffer für „${escapeHtml(q)}“.</div>`; return; }
+  const re = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&") + ")", "ig");
+  searchResultsEl.innerHTML = matches.map(m => {
+    const snip = escapeHtml(m.text).replace(re, "<mark>$1</mark>");
+    return `<div class="result-row" data-chapterref="${escapeHtml(m.r.chapterRef)}" data-num="${m.num}">
+      <div class="rr-ref">${escapeHtml(m.r.chapterRef)},${m.num}</div>
+      <div class="rr-snip">${snip}</div>
+    </div>`;
+  }).join("");
+  searchResultsEl.querySelectorAll(".result-row").forEach(row => {
+    row.addEventListener("click", () => {
+      const chapterRef = row.dataset.chapterref;
+      const num = parseInt(row.dataset.num,10);
+      const chunk = findChunkContainingVerse(chapterRef, num);
+      if(chunk) openOverlay(chunk);
+    });
+  });
+}
+searchInput.addEventListener("input", () => runSearch(searchInput.value));
+
+/* =========================================================================
+   TAB: MEINE BIBEL
+   ========================================================================= */
+const subtabBtns = document.querySelectorAll("#subtabs button");
+const subPanels = { fav: document.getElementById("subFav"), notes: document.getElementById("subNotes"), history: document.getElementById("subHistory") };
+subtabBtns.forEach(b => {
+  b.addEventListener("click", () => {
+    subtabBtns.forEach(x=>x.classList.toggle("active", x===b));
+    Object.keys(subPanels).forEach(k => subPanels[k].classList.toggle("active", k===b.dataset.sub));
+  });
+});
+
+function renderFavorites(){
+  const keys = Object.keys(state.favorites);
+  if(!keys.length){ subPanels.fav.innerHTML = `<div class="empty-hint">Noch keine Favoriten. Tippe in einem Abschnitt auf eine Versnummer, um sie zu markieren.</div>`; return; }
+  subPanels.fav.innerHTML = keys.map(key => {
+    const [chapterRef, numStr] = key.split("::");
+    const num = parseInt(numStr,10);
+    const v = findVerse(chapterRef, num);
+    if(!v) return "";
+    return `<div class="list-row" data-chapterref="${escapeHtml(chapterRef)}" data-num="${num}">
+      <div class="lr-ref">★ ${escapeHtml(chapterRef)},${num}</div>
+      <div class="lr-snip">${escapeHtml(v.text)}</div>
+    </div>`;
+  }).join("");
+  wireListRows(subPanels.fav);
+}
+function renderNotesList(){
+  const ids = Object.keys(state.notes);
+  if(!ids.length){ subPanels.notes.innerHTML = `<div class="empty-hint">Noch keine Notizen. Du kannst in jedem Abschnitt unten eine Notiz eintragen.</div>`; return; }
+  subPanels.notes.innerHTML = ids.map(id => {
+    const r = READINGS.find(x => x.id === parseInt(id,10));
+    if(!r) return "";
+    return `<div class="list-row" data-id="${id}">
+      <div class="lr-ref">${escapeHtml(r.ref)}</div>
+      <div class="lr-snip">${escapeHtml(state.notes[id])}</div>
+    </div>`;
+  }).join("");
+  subPanels.notes.querySelectorAll(".list-row").forEach(row => {
+    row.addEventListener("click", () => {
+      const r = READINGS.find(x => x.id === parseInt(row.dataset.id,10));
+      if(r) openOverlay(r);
+    });
+  });
+}
+function renderHistoryList(){
+  if(!state.history.length){ subPanels.history.innerHTML = `<div class="empty-hint">Noch kein Leseverlauf vorhanden.</div>`; return; }
+  subPanels.history.innerHTML = state.history.map(h => {
+    const r = READINGS.find(x => x.id === h.id);
+    if(!r) return "";
+    const d = new Date(h.ts);
+    const ds = d.toLocaleDateString("de-DE") + " · " + d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+    return `<div class="list-row" data-id="${h.id}">
+      <div class="lr-ref">${escapeHtml(r.ref)}</div>
+      <div class="lr-snip" style="font-family:var(--sans); font-size:.72rem; color:var(--muted);">${ds}</div>
+    </div>`;
+  }).join("");
+  subPanels.history.querySelectorAll(".list-row").forEach(row => {
+    row.addEventListener("click", () => {
+      const r = READINGS.find(x => x.id === parseInt(row.dataset.id,10));
+      if(r) openOverlay(r);
+    });
+  });
+}
+function wireListRows(container){
+  container.querySelectorAll(".list-row").forEach(row => {
+    row.addEventListener("click", () => {
+      const chapterRef = row.dataset.chapterref;
+      const num = parseInt(row.dataset.num,10);
+      const chunk = findChunkContainingVerse(chapterRef, num);
+      if(chunk) openOverlay(chunk);
+    });
+  });
+}
+document.getElementById("randomVerseBtn").addEventListener("click", () => {
+  const v = getRandomVerse();
+  const chunk = findChunkContainingVerse(v.chapterRef, v.num);
+  if(chunk) openOverlay(chunk);
+});
+
+/* =========================================================================
+   TAB: MEHR (Einstellungen)
+   ========================================================================= */
+function isNightHours(){
+  const h = new Date().getHours();
+  return h >= 21 || h < 7;
+}
+function effectiveTheme(){
+  return (state.autoNight && isNightHours()) ? "night" : state.theme;
+}
+function applyDisplaySettings(){
+  const eff = effectiveTheme();
+  document.documentElement.setAttribute("data-theme", eff);
+  document.body.setAttribute("data-fontsize", state.fontSize);
+  document.body.setAttribute("data-fontstyle", state.fontStyle);
+  document.querySelectorAll("#themeRow button").forEach(b => b.classList.toggle("active", b.dataset.theme===state.theme));
+  document.querySelectorAll("#fontSizeRow button").forEach(b => b.classList.toggle("active", b.dataset.size===state.fontSize));
+  document.querySelectorAll("#fontStyleRow button").forEach(b => b.classList.toggle("active", b.dataset.fstyle===state.fontStyle));
+  const cb = document.getElementById("autoNightToggle");
+  if(cb) cb.checked = !!state.autoNight;
+  const statusEl = document.getElementById("autoNightStatus");
+  if(statusEl){
+    if(state.autoNight && eff === "night" && state.theme !== "night"){
+      statusEl.style.display = "block";
+      statusEl.textContent = "Gerade aktiv: Nachtmodus (automatisch bis 7 Uhr).";
+    } else {
+      statusEl.style.display = "none";
+    }
+  }
+  const metaTheme = document.getElementById("themeColorMeta");
+  if(metaTheme){
+    const bgVal = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+    if(bgVal) metaTheme.setAttribute("content", bgVal);
+  }
+}
+document.getElementById("themeRow").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if(!b) return;
+  state.theme = b.dataset.theme; saveState(); applyDisplaySettings();
+});
+document.getElementById("fontSizeRow").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if(!b) return;
+  state.fontSize = b.dataset.size; saveState(); applyDisplaySettings();
+});
+document.getElementById("fontStyleRow").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if(!b) return;
+  state.fontStyle = b.dataset.fstyle; saveState(); applyDisplaySettings();
+});
+document.getElementById("autoNightToggle").addEventListener("change", (e) => {
+  state.autoNight = e.target.checked; saveState(); applyDisplaySettings();
+  showToast(state.autoNight ? "Automatischer Nachtmodus aktiviert." : "Automatischer Nachtmodus deaktiviert.");
+});
+/* Nachtmodus zeitgesteuert nachprüfen: beim Zurückkehren in den Vordergrund
+   und alle 5 Minuten, damit der Wechsel auch bei offener App greift. */
+document.addEventListener("visibilitychange", () => { if(!document.hidden) applyDisplaySettings(); });
+setInterval(applyDisplaySettings, 5*60*1000);
+
+function refreshAllStats(){
+  document.getElementById("chapterCountLabel").textContent = READINGS.length;
+  document.getElementById("statChapters").textContent = READINGS.length;
+  document.getElementById("statRead").textContent = Object.keys(state.readChunks).length;
+  document.getElementById("statFav").textContent = Object.keys(state.favorites).length;
+  document.getElementById("statNotes").textContent = Object.keys(state.notes).length;
+}
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `zwei-minuten-bibel-backup-${todayStr()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast("Sicherung wurde heruntergeladen.");
+});
+document.getElementById("importFile").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const imported = JSON.parse(reader.result);
+      if(!confirm("Gesicherte Daten einspielen? Der aktuelle Stand auf diesem Gerät wird überschrieben.")) return;
+      state = Object.assign(defaultState(), imported);
+      saveState();
+      fullRerender();
+      showToast("Daten wurden wiederhergestellt.");
+    }catch(err){
+      showToast("Diese Datei konnte nicht gelesen werden.");
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if(confirm("Wirklich ALLES zurücksetzen? Streak, Favoriten, Notizen, Markierungen und Fortschritt gehen dabei verloren.")){
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_KEY_OLD);
+    state = defaultState();
+    highlightMode = false;
+    fullRerender();
+    showToast("Zurückgesetzt.");
+  }
+});
+
+/* =========================================================================
+   Tab-Navigation
+   ========================================================================= */
+const tabButtons = document.querySelectorAll(".tabbar button");
+const views = { heute: document.getElementById("view-heute"), bibliothek: document.getElementById("view-bibliothek"), meinebibel: document.getElementById("view-meinebibel"), mehr: document.getElementById("view-mehr") };
+tabButtons.forEach(b => {
+  b.addEventListener("click", () => {
+    tabButtons.forEach(x => x.classList.toggle("active", x===b));
+    Object.keys(views).forEach(k => views[k].classList.toggle("active", k===b.dataset.tab));
+    if(b.dataset.tab === "bibliothek") renderLibrary();
+    if(b.dataset.tab === "meinebibel"){ renderFavorites(); renderNotesList(); renderHistoryList(); }
+    if(b.dataset.tab === "mehr") refreshAllStats();
+  });
+});
+
+/* =========================================================================
+   Initiales Rendern
+   ========================================================================= */
+function fullRerender(){
+  applyDisplaySettings();
+  renderStats();
+  renderCalendarStrip();
+  renderToggle();
+  renderVerseOfDay();
+  updateGoButtonLabel();
+  renderLibrary();
+  renderFavorites();
+  renderNotesList();
+  renderHistoryList();
+  refreshAllStats();
+  if(state.lastDate === todayStr() && state.todayReadingRef){
+    const r = READINGS.find(x => x.ref === state.todayReadingRef);
+    if(r) heutePassage.show(r, pool());
+  }
+}
+fullRerender();
+</script>
+<script>
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
