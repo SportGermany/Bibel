@@ -1,6 +1,6 @@
 /* Bibel Service Worker: macht die Bibel offline nutzbar */
-const VERSION = 'bibel-v1';
-const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './maskable-192.png', './maskable-512.png', './apple-touch-icon.png', './favicon.png'];
+const VERSION = 'bibel-v2';
+const SHELL = ['./', './index.html', './elb1905.json', './manifest.json', './icon-192.png', './icon-512.png', './maskable-192.png', './maskable-512.png', './apple-touch-icon.png', './favicon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).catch(() => {}).then(() => self.skipWaiting()));
