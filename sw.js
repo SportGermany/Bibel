@@ -1,5 +1,5 @@
 /* Bibel Service Worker: macht die Bibel offline nutzbar */
-const VERSION = 'bibel-v3';
+const VERSION = 'bibel-v4';
 const SHELL = ['./', './index.html', './elb1905.json', './manifest.json', './inter.woff2', './icon-192.png', './icon-512.png', './maskable-192.png', './maskable-512.png', './apple-touch-icon.png', './favicon.png'];
 
 self.addEventListener('install', e => {
