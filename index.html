@@ -423,20 +423,22 @@
   var KEY = "sg-design";
   // Schlicht nach dem Vorbild von Notion Kalender und Apple: ruhige Grautöne, eine Akzentfarbe, feine Linien
   var THEMES = [
-    { id: "notion", name: "Notion", info: "Neutrales Grau, klares Blau (Standard)", bg: "#191919", s1: "#202020", s2: "#272727", s3: "#2f2f2f", line: "#2c2c2c", ink: "#ebebea", muted: "#9b9a97", faint: "#6b6a67", acc: "#529cca" },
-    { id: "apple", name: "Apple", info: "Tiefschwarz mit Systemblau", bg: "#000000", s1: "#1c1c1e", s2: "#2c2c2e", s3: "#3a3a3c", line: "#2c2c2e", ink: "#f5f5f7", muted: "#98989d", faint: "#636366", acc: "#0a84ff" },
-    { id: "graphit", name: "Graphit", info: "Anthrazit mit Orange", bg: "#161616", s1: "#1e1e1e", s2: "#272727", s3: "#313131", line: "#2d2d2d", ink: "#ececec", muted: "#a0a0a0", faint: "#6a6a6a", acc: "#ff9f0a" },
-    { id: "mitternacht", name: "Mitternacht", info: "Nachtblau", bg: "#0d1117", s1: "#151b23", s2: "#1c2430", s3: "#243040", line: "#232c38", ink: "#e6edf3", muted: "#9aa7b4", faint: "#5d6b7a", acc: "#6ea8fe" },
-    { id: "schiefer", name: "Schiefer", info: "Kühles Blaugrau, Petrol", bg: "#121417", s1: "#1a1d21", s2: "#22262b", s3: "#2b3036", line: "#2a2f35", ink: "#e8eaed", muted: "#a0a7b0", faint: "#69707a", acc: "#5ac8c8" },
-    { id: "salbei", name: "Salbei", info: "Gedämpftes Grün", bg: "#121513", s1: "#191d1a", s2: "#212622", s3: "#2a302b", line: "#272d28", ink: "#e6ebe6", muted: "#9eaa9f", faint: "#667067", acc: "#7fbf95" },
-    { id: "sand", name: "Sand", info: "Warmes Dunkelbraun, Karamell", bg: "#171513", s1: "#1f1c19", s2: "#282420", s3: "#322d28", line: "#2e2a25", ink: "#efe9e2", muted: "#aca295", faint: "#766d62", acc: "#d6a26b" },
-    { id: "lavendel", name: "Lavendel", info: "Dunkles Violettgrau", bg: "#151419", s1: "#1c1b22", s2: "#24222b", s3: "#2d2b35", line: "#2b2932", ink: "#ece9f2", muted: "#a49fb0", faint: "#6d6878", acc: "#a78bfa" },
-    { id: "koralle", name: "Koralle", info: "Warmes Grau mit Korallrot", bg: "#161414", s1: "#1e1b1b", s2: "#272323", s3: "#312c2c", line: "#2d2828", ink: "#efe8e7", muted: "#ab9f9d", faint: "#756a68", acc: "#ff7a6b" },
-    { id: "oled", name: "OLED", info: "Reines Schwarz, Gelb – spart Akku", bg: "#000000", s1: "#0c0c0c", s2: "#161616", s3: "#202020", line: "#1f1f1f", ink: "#f2f2f2", muted: "#a3a3a3", faint: "#6b6b6b", acc: "#ffd60a" }
+    { id: "notion", name: "Notion", info: "Neutrales Grau, klares Blau (Standard)", bg: "#191919", s1: "#202020", s2: "#272727", s3: "#2f2f2f", line: "#2c2c2c", ink: "#ebebea", muted: "#9b9a97", faint: "#6b6a67", acc: "#529cca", g2: "#7c5cff", g3: "#2f8f6f" },
+    { id: "apple", name: "Apple", info: "Tiefschwarz mit Systemblau", bg: "#000000", s1: "#1c1c1e", s2: "#2c2c2e", s3: "#3a3a3c", line: "#2c2c2e", ink: "#f5f5f7", muted: "#98989d", faint: "#636366", acc: "#0a84ff", g2: "#bf5af2", g3: "#30d158" },
+    { id: "graphit", name: "Graphit", info: "Anthrazit mit Orange", bg: "#161616", s1: "#1e1e1e", s2: "#272727", s3: "#313131", line: "#2d2d2d", ink: "#ececec", muted: "#a0a0a0", faint: "#6a6a6a", acc: "#ff9f0a", g2: "#ff375f", g3: "#5e5ce6" },
+    { id: "mitternacht", name: "Mitternacht", info: "Nachtblau", bg: "#0d1117", s1: "#151b23", s2: "#1c2430", s3: "#243040", line: "#232c38", ink: "#e6edf3", muted: "#9aa7b4", faint: "#5d6b7a", acc: "#6ea8fe", g2: "#b0457a", g3: "#2f8f6f" },
+    { id: "schiefer", name: "Schiefer", info: "Kühles Blaugrau, Petrol", bg: "#121417", s1: "#1a1d21", s2: "#22262b", s3: "#2b3036", line: "#2a2f35", ink: "#e8eaed", muted: "#a0a7b0", faint: "#69707a", acc: "#5ac8c8", g2: "#5e5ce6", g3: "#ff9f0a" },
+    { id: "salbei", name: "Salbei", info: "Gedämpftes Grün", bg: "#121513", s1: "#191d1a", s2: "#212622", s3: "#2a302b", line: "#272d28", ink: "#e6ebe6", muted: "#9eaa9f", faint: "#667067", acc: "#7fbf95", g2: "#5ac8c8", g3: "#d6a26b" },
+    { id: "sand", name: "Sand", info: "Warmes Dunkelbraun, Karamell", bg: "#171513", s1: "#1f1c19", s2: "#282420", s3: "#322d28", line: "#2e2a25", ink: "#efe9e2", muted: "#aca295", faint: "#766d62", acc: "#d6a26b", g2: "#ff7a6b", g3: "#7fbf95" },
+    { id: "lavendel", name: "Lavendel", info: "Dunkles Violettgrau", bg: "#151419", s1: "#1c1b22", s2: "#24222b", s3: "#2d2b35", line: "#2b2932", ink: "#ece9f2", muted: "#a49fb0", faint: "#6d6878", acc: "#a78bfa", g2: "#ff6bcb", g3: "#5ac8fa" },
+    { id: "koralle", name: "Koralle", info: "Warmes Grau mit Korallrot", bg: "#161414", s1: "#1e1b1b", s2: "#272323", s3: "#312c2c", line: "#2d2828", ink: "#efe8e7", muted: "#ab9f9d", faint: "#756a68", acc: "#ff7a6b", g2: "#ffd60a", g3: "#a78bfa" },
+    { id: "oled", name: "OLED", info: "Reines Schwarz, Gelb – spart Akku", bg: "#000000", s1: "#0c0c0c", s2: "#161616", s3: "#202020", line: "#1f1f1f", ink: "#f2f2f2", muted: "#a3a3a3", faint: "#6b6b6b", acc: "#ffd60a", g2: "#ff9f0a", g3: "#0a84ff" }
   ];
   // frühere Namen weiter verstehen
   var ALIAS = { wald: "salbei", espresso: "sand", aubergine: "lavendel", tiefsee: "schiefer", oxid: "koralle", bordeaux: "koralle" };
-  var FONT = "-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Segoe UI Variable Text','Segoe UI',Roboto,'Helvetica Neue',system-ui,sans-serif";
+  // Inter liegt als Datei in jeder App (offline, auf Samsung und iPhone gleich)
+  var FONT = "'Inter SG',Inter,-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',system-ui,sans-serif";
+  var FONTURL = "/" + (location.pathname.split("/")[1] || "") + "/inter.woff2";
   // App-Variable -> Farbrolle der Farbwelt
   var MAPS = {
     panel: { bg: "bg", panel: "s1", "panel-2": "s2", "panel-3": "s3", line: "line", text: "ink", "text-dim": "muted", "text-faint": "faint" },
@@ -449,6 +451,12 @@
   // Laptop-Anpassungen: schmale Handy-Spalten verbreitern, zu breite Seiten mittig begrenzen
   // Doppelte Design-Schalter der einzelnen Apps ausblenden: Farben kommen für alle aus dem Bereich „Design“.
   var LAYOUT = {
+    // Planer: die Leiste liegt sonst im Fluss – als schwebende Bahn über dem Inhalt
+    kalender: "@media(max-width:1000px){html:not(.sg-noglass) .tabbar{position:fixed;z-index:40}html:not(.sg-noglass) #view{padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))}" +
+      "html:not(.sg-noglass) .fab{bottom:calc(94px + env(safe-area-inset-bottom,0px))!important;border-radius:50%!important}html:not(.sg-noglass) .tabbar button{border-radius:22px}" +
+      // in Schule/Pause hat der Bereich unten seine eigene Leiste: die Planer-Leiste bleibt dann darunter statt darüber
+      "html:not(.sg-noglass) .app.inmod .tabbar{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;margin:6px 12px calc(8px + env(safe-area-inset-bottom,0px))!important}}" +
+      "html:not(.sg-noglass) .bar{background:" + "transparent!important}",
     panel: "@media(min-width:900px){.onb{padding-left:max(24px,calc(50vw - 380px))!important;padding-right:max(24px,calc(50vw - 380px))!important}}" +
       // Training auf Tablet quer / Laptop: Karten in zwei Spalten statt einer langen Liste
       "@media(min-width:1100px){#s-heute.active,#s-lauf.active,#s-fitness.active,#s-daten.active{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:18px;align-items:stretch;align-content:start}" +
@@ -472,6 +480,37 @@
     ".card,.hero,.feed-card,.widget-tile,.tile,.quote-card,.settings-section,.stat-box,.passage{border-radius:12px!important}" +
     ".hero{border:1px solid var(--sg-line)!important}" +
     "button,.btn,.chip{box-shadow:none!important;background-image:none!important}";
+  var GLASS_CARDS = {
+    kalender: ".card,.tl-tile,.wpstrip,.qa,.nudge",
+    lernplan: ".card,.wkall",
+    panel: ".card,.hero,.feed-card,.stat,.widget-tile,.stat-row>*",
+    rodeln: ".card,.set,.tabs2 button",
+    puls: ".panel",
+    bibel: ".quote-card,.passage.show,.settings-section,.stat-box"
+  };
+  var GLASS_NAV = {
+    kalender: [".tabbar", ".tabbar button.on"],
+    lernplan: [".tabs", ".tab.on"],
+    panel: [".nav", ".tab.on"],
+    rodeln: [".tabbar", ".tabbar button.on"],
+    puls: ["nav.tabs", "nav.tabs button.on"],
+    bibel: [".tabbar", ".tabbar button.active"]
+  };
+  function glassCSS(t, roles) {
+    var g = "html:not(.sg-noglass)";
+    var s1 = rgba(t.s1, .56), hi = "inset 0 1px 0 rgba(255,255,255,.07)";
+    var css = g + ":not(#sg) body{background:radial-gradient(55% 38% at 8% 12%," + rgba(t.acc, .20) + ",transparent 70%),radial-gradient(48% 34% at 96% 48%," + rgba(t.g2 || t.acc, .15) + ",transparent 70%),radial-gradient(60% 40% at 25% 100%," + rgba(t.g3 || t.acc, .13) + ",transparent 72%)," + t.bg + ";background-attachment:fixed}";
+    var cards = GLASS_CARDS[MODE];
+    if (cards) css += cards.split(",").map(function (c) { return g + " " + c; }).join(",") + "{background-color:" + s1 + "!important;-webkit-backdrop-filter:blur(22px) saturate(165%);backdrop-filter:blur(22px) saturate(165%);border:1px solid rgba(255,255,255,.085)!important;border-radius:22px!important;box-shadow:" + hi + "!important}";
+    var nav = GLASS_NAV[MODE];
+    if (nav) {
+      css += g + " " + nav[0] + "{left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;max-width:560px;margin:0 auto!important;border-radius:28px!important;" +
+        "background:" + rgba(t.s1, .62) + "!important;-webkit-backdrop-filter:blur(26px) saturate(180%)!important;backdrop-filter:blur(26px) saturate(180%)!important;border:1px solid rgba(255,255,255,.1)!important;" +
+        "box-shadow:0 12px 34px rgba(0,0,0,.42)," + hi + "!important;padding-left:6px!important;padding-right:6px!important;padding-bottom:0!important;overflow:hidden}";
+      css += g + " " + nav[1] + "{background:rgba(255,255,255,.11)!important;border-radius:22px!important}";
+    }
+    return css;
+  }
   var FONTVARS = { rodeln: ["fd", "fb"], puls: ["font-display", "font-body"], bibel: ["sans"] };
   var script = document.currentScript;
   var MODE = (script && script.getAttribute("data-design")) || "panel";
@@ -515,7 +554,8 @@
     // :not(#sg) hebt die Regel über alle Hell/Dunkel-Regeln der Apps – alle Apps bleiben dunkel.
     // In der Bibel bleiben Sepia- und Nachtmodus als Lesemodi erhalten.
     var sel = MODE === "bibel" ? "html:root:not(#sg):not([data-theme=\"sepia\"]):not([data-theme=\"night\"])" : "html:root:not(#sg)";
-    return sel + "{" + vars + "}html:not(#sg) body{background-color:var(--bg)}body,button,input,select,textarea{font-family:" + FONT + "}" + PLAIN + (LAYOUT[MODE] || "");
+    return "@font-face{font-family:'Inter SG';src:url(" + FONTURL + ") format('woff2');font-weight:100 900;font-display:swap}" +
+      sel + "{" + vars + "}html:not(#sg) body{background-color:var(--bg)}body,button,input,select,textarea{font-family:" + FONT + ";font-feature-settings:'cv11','ss01'}" + PLAIN + glassCSS(t) + (LAYOUT[MODE] || "");
   }
   function apply(id) {
     var t = get(id || currentId());
@@ -526,7 +566,11 @@
     window.dispatchEvent(new CustomEvent("sg-theme", { detail: t }));
     return t;
   }
+  function glassOn() { try { return localStorage.getItem("sg-glass") !== "0"; } catch (e) { return true; } }
+  document.documentElement.classList.toggle("sg-noglass", !glassOn());
   window.SGTheme = {
+    glass: glassOn,
+    setGlass: function (on) { try { localStorage.setItem("sg-glass", on ? "1" : "0"); } catch (e) {} document.documentElement.classList.toggle("sg-noglass", !on); window.dispatchEvent(new CustomEvent("sg-theme-set", { detail: "glass" })); },
     list: THEMES,
     current: function () { return get(currentId()); },
     set: function (id) { try { localStorage.setItem(KEY, id); } catch (e) {} apply(id); window.dispatchEvent(new CustomEvent("sg-theme-set", { detail: id })); }
@@ -534,7 +578,7 @@
   // ?design=… in der Adresse: zum Ausprobieren ohne zu speichern
   var q = /[?&]design=([a-z]+)/.exec(location.search);
   apply(q ? q[1] : null);
-  window.addEventListener("storage", function (e) { if (e.key === KEY || e.key === null) apply(); });
+  window.addEventListener("storage", function (e) { if (e.key === KEY || e.key === null) apply(); if (e.key === "sg-glass") document.documentElement.classList.toggle("sg-noglass", !glassOn()); });
 })();
 </script>
 <!-- verbund-design:end -->
@@ -1586,6 +1630,18 @@ function fullRerender(){
   }
 }
 fullRerender();
+// Sprungziele aus dem Befehlsmenü der anderen Apps
+function bibleHash(){
+  const h = location.hash.replace("#", "");
+  if(!h) return;
+  history.replaceState(null, "", location.pathname);
+  const tab = t => { const b = document.querySelector('.tabbar [data-tab="' + t + '"]'); if(b) b.click(); };
+  if(h === "lesen"){ tab("heute"); readToday(); document.getElementById("passageHeute").scrollIntoView({ behavior: "smooth" }); }
+  else if(h === "zufall"){ tab("meinebibel"); document.getElementById("randomVerseBtn").click(); }
+  else if(["heute", "bibliothek", "meinebibel", "mehr"].indexOf(h) > -1) tab(h);
+}
+window.addEventListener("hashchange", bibleHash);
+bibleHash();
 } // startApp
 })();
 </script>
@@ -1647,6 +1703,75 @@ fullRerender();
   window.SGInstall = { available: function () { return !!window.SGInstallEvt; }, installed: installed, prompt: prompt };
   window.addEventListener("sg-install", render);
   function mount() { document.head.appendChild(st); document.body.appendChild(box); render(); }
+  if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
+})();
+/* App-Wechsler und Befehle für die Bibel (ohne Kalender und Cloud) – gleiche Bedienung wie in Planer und Training */
+(function () {
+  "use strict";
+  if (window.self !== window.top || window.SGSwitch) return;
+  window.SGSwitch = true;
+  var APPS = [["planer", "Planer", "/Schulplaner/"], ["training", "Training", "/trainingsblog/"], ["bibel", "Bibel", "/Bibel/"]];
+  var st = document.createElement("style");
+  st.textContent = "html.sg-sw body{padding-top:calc(46px + env(safe-area-inset-top,0px))!important;box-sizing:border-box}" +
+    ".sgsw{position:fixed;top:0;left:0;right:0;z-index:25;height:calc(46px + env(safe-area-inset-top,0px));padding:calc(6px + env(safe-area-inset-top,0px)) 10px 6px;display:flex;align-items:center;justify-content:center;" +
+    "background:color-mix(in srgb,var(--bg) 70%,transparent);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);border-bottom:1px solid rgba(255,255,255,.07);font-family:var(--sans)}" +
+    ".sgsw .seg3{display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08)}" +
+    ".sgsw .seg3 a{padding:6px 14px;border-radius:999px;font-size:13.5px;font-weight:600;color:var(--muted);text-decoration:none}.sgsw .seg3 a.on{background:rgba(255,255,255,.16);color:var(--ink)}" +
+    ".sgsw .cmdb{position:absolute;right:10px;bottom:6px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.07);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer}" +
+    ".sgpal{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.35);display:flex;justify-content:center;align-items:flex-start;padding:calc(60px + env(safe-area-inset-top,0px)) 12px 12px;font-family:var(--sans)}" +
+    ".sgpal .pp{width:100%;max-width:600px;max-height:76vh;display:flex;flex-direction:column;border-radius:22px;overflow:hidden;background:color-mix(in srgb,var(--bg) 80%,transparent);-webkit-backdrop-filter:blur(30px) saturate(170%);backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 60px rgba(0,0,0,.5)}" +
+    ".sgpal input{border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);font:17px var(--sans);padding:16px 18px;outline:none}" +
+    ".sgpal .ll{overflow:auto;padding:6px}.sgpal .g{font-size:12px;font-weight:600;color:var(--muted);padding:10px 12px 4px}" +
+    ".sgpal .it{padding:10px 12px;border-radius:12px;font-size:15px;color:var(--ink);cursor:pointer}.sgpal .it.on{background:rgba(255,255,255,.1)}";
+  function cmds() {
+    var L = [], add = function (g, label, url) { L.push({ g: g, label: label, url: url }); };
+    add("Apps", "Planer öffnen", "/Schulplaner/"); add("Apps", "Training öffnen", "/trainingsblog/");
+    add("Bibel", "Heute lesen", "#lesen"); add("Bibel", "Bibliothek (alle Bücher)", "#bibliothek"); add("Bibel", "Zufallsvers", "#zufall"); add("Bibel", "Meine Bibel: Favoriten, Notizen", "#meinebibel"); add("Bibel", "Einstellungen", "#mehr");
+    add("Planer", "Heute (Briefing)", "/Schulplaner/#brief"); add("Planer", "Kalender", "/Schulplaner/#cal"); add("Planer", "Aufgaben", "/Schulplaner/#tasks"); add("Planer", "Schule", "/Schulplaner/#schule"); add("Planer", "Pause starten", "/Schulplaner/#pause"); add("Planer", "Woche planen", "/Schulplaner/#wochenplanung");
+    add("Training", "Training starten", "/trainingsblog/#start"); add("Training", "Mobility-Block", "/trainingsblog/#mobility"); add("Training", "Atemübung starten", "/trainingsblog/#atmung/train"); add("Training", "Morgen-HRV messen", "/trainingsblog/#atmung");
+    if (window.SGTheme) {
+      SGTheme.list.forEach(function (t) { L.push({ g: "Design", label: "Design: " + t.name + " – " + t.info, run: function () { SGTheme.set(t.id); } }); });
+      L.push({ g: "Design", label: "Glaseffekt " + (SGTheme.glass() ? "ausschalten" : "einschalten"), run: function () { SGTheme.setGlass(!SGTheme.glass()); } });
+    }
+    if (window.SGInstall && !SGInstall.installed()) L.push({ g: "App", label: "Bibel als App installieren", run: function () { SGInstall.prompt(); } });
+    return L;
+  }
+  var pal = null;
+  function run(c) { close(); if (c.run) c.run(); else if (c.url.charAt(0) === "#") location.hash = c.url; else location.href = c.url; }
+  function close() { if (pal) { pal.el.remove(); pal = null; } }
+  function open() {
+    if (pal) return;
+    var el = document.createElement("div"); el.className = "sgpal";
+    el.innerHTML = "<div class='pp'><input placeholder='Befehl oder App suchen …' autocomplete='off'><div class='ll'></div></div>";
+    document.body.appendChild(el); pal = { el: el, i: 0, list: [] };
+    var inp = el.querySelector("input");
+    function draw() {
+      var q = inp.value.trim().toLowerCase(); pal.list = cmds().filter(function (c) { var t = (c.g + " " + c.label).toLowerCase(); return !q || q.split(/\s+/).every(function (w) { return t.indexOf(w) > -1; }); });
+      pal.i = Math.min(pal.i, Math.max(0, pal.list.length - 1));
+      var g = "", h = "";
+      pal.list.forEach(function (c, n) { if (c.g !== g) { g = c.g; h += "<div class='g'>" + g + "</div>"; } h += "<div class='it" + (n === pal.i ? " on" : "") + "' data-n='" + n + "'>" + c.label.replace(/</g, "&lt;") + "</div>"; });
+      el.querySelector(".ll").innerHTML = h || "<div class='g'>Nichts gefunden</div>";
+    }
+    inp.addEventListener("input", function () { pal.i = 0; draw(); });
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown") { pal.i = Math.min(pal.list.length - 1, pal.i + 1); draw(); e.preventDefault(); }
+      else if (e.key === "ArrowUp") { pal.i = Math.max(0, pal.i - 1); draw(); e.preventDefault(); }
+      else if (e.key === "Enter" && pal.list[pal.i]) run(pal.list[pal.i]);
+      else if (e.key === "Escape") close();
+    });
+    el.addEventListener("click", function (e) { if (e.target === el) return close(); var it = e.target.closest("[data-n]"); if (it) run(pal.list[+it.dataset.n]); });
+    draw(); inp.focus();
+  }
+  function mount() {
+    document.head.appendChild(st);
+    document.documentElement.classList.add("sg-sw");
+    var bar = document.createElement("div"); bar.className = "sgsw";
+    bar.innerHTML = "<div class='seg3'>" + APPS.map(function (a) { return "<a href='" + (a[0] === "bibel" ? "#" : a[2]) + "' class='" + (a[0] === "bibel" ? "on" : "") + "' data-app='" + a[0] + "'>" + a[1] + "</a>"; }).join("") +
+      "</div><button class='cmdb' aria-label='Befehle' title='Befehle (Strg+K)'><svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='6.5'/><path d='M20 20l-4.2-4.2'/></svg></button>";
+    bar.addEventListener("click", function (e) { if (e.target.closest(".cmdb")) open(); var a = e.target.closest("a[data-app=bibel]"); if (a) e.preventDefault(); });
+    document.body.appendChild(bar);
+  }
+  document.addEventListener("keydown", function (e) { if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); open(); } });
   if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
 })();
 </script>
