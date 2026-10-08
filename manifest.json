@@ -39,5 +39,46 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Weiterlesen",
+      "short_name": "Weiterlesen",
+      "description": "Abschnitt von heute",
+      "url": "./#sg=b_lesen",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Heute",
+      "short_name": "Heute",
+      "description": "Vers des Tages",
+      "url": "./#sg=b_heute",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Suche",
+      "short_name": "Suche",
+      "description": "Bibliothek & Suche",
+      "url": "./#sg=b_bib",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
